@@ -3,6 +3,22 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# Firebase creds
+**/Config/firebase-adminsdk.json
+**/firebase-adminsdk.json
+
+# App settings with secrets
+appsettings.Development.json
+appsettings.Production.json
+
+# User secrets
+**/secrets.json
+
+# Azure publish profiles 
+**/PublishProfiles/
+*.pubxml
+*.PublishSettings
+
 # User-specific files
 *.rsuser
 *.suo
