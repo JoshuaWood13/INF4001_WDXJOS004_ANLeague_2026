@@ -8,10 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="FirebaseAdmin" Version="3.4.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Secrets\" />
+    <PackageReference Include="Google.Cloud.Firestore" Version="3.11.0" />
   </ItemGroup>
 
 </Project>
