@@ -1,26 +1,27 @@
 using INF4001_WDXJOS004_ANLeague_2026.Models.Entities;
+using CountryEntity = INF4001_WDXJOS004_ANLeague_2026.Models.Entities.Country;
 
 namespace INF4001_WDXJOS004_ANLeague_2026.Services.Country
 {
     public class CountryService : ICountryService
     {
         // TODO: Implement country management operations
-        public Task<string> CreateCountryAsync(Country country)
+        public Task<string> CreateCountryAsync(CountryEntity country)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Country?> GetCountryByIdAsync(string countryId)
+        public Task<CountryEntity?> GetCountryByIdAsync(string countryId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<Country?> GetCountryByRepresentativeIdAsync(string representativeId)
+        public Task<CountryEntity?> GetCountryByRepresentativeIdAsync(string representativeId)
         {
             throw new NotImplementedException();
         }
 
-        public Task<double> CalculateAverageRatingAsync(Country country)
+        public Task<double> CalculateAverageRatingAsync(CountryEntity country)
         {
             throw new NotImplementedException();
         }

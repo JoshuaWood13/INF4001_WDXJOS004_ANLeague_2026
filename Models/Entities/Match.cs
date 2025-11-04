@@ -12,7 +12,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Models.Entities
         public int HomeScore { get; set; }
         public int AwayScore { get; set; }
         public MatchStatus Status { get; set; }
-        public MatchType MatchType { get; set; }
+        public Enums.MatchType MatchType { get; set; }
         public List<Goal> GoalScorers { get; set; } = new List<Goal>();
         public List<CommentaryMoment> Commentary { get; set; } = new List<CommentaryMoment>(); // Only for Played matches
         public DateTime MatchDate { get; set; }

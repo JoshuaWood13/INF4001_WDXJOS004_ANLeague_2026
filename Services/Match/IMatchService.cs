@@ -1,12 +1,13 @@
 using INF4001_WDXJOS004_ANLeague_2026.Models.Entities;
+using MatchEntity = INF4001_WDXJOS004_ANLeague_2026.Models.Entities.Match;
 
 namespace INF4001_WDXJOS004_ANLeague_2026.Services.Match
 {
     public interface IMatchService
     {
-        Task<Match> SimulateMatchAsync(string matchId);
-        Task<Match> PlayMatchAsync(string matchId, Func<CommentaryMoment, Task>? commentaryCallback = null);
-        Task<Match?> GetMatchByIdAsync(string matchId);
-        Task<List<Match>> GetMatchesByTournamentAsync(string tournamentId);
+        Task<MatchEntity> SimulateMatchAsync(string matchId);
+        Task<MatchEntity> PlayMatchAsync(string matchId, Func<CommentaryMoment, Task>? commentaryCallback = null);
+        Task<MatchEntity?> GetMatchByIdAsync(string matchId);
+        Task<List<MatchEntity>> GetMatchesByTournamentAsync(string tournamentId);
     }
 }

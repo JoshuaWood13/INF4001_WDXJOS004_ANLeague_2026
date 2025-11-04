@@ -1,4 +1,5 @@
 using INF4001_WDXJOS004_ANLeague_2026.Models.Entities;
+using TournamentEntity = INF4001_WDXJOS004_ANLeague_2026.Models.Entities.Tournament;
 
 namespace INF4001_WDXJOS004_ANLeague_2026.Services.Tournament
 {
@@ -10,7 +11,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Tournament
             throw new NotImplementedException();
         }
 
-        public Task<Tournament?> GetCurrentActiveTournamentAsync()
+        public Task<TournamentEntity?> GetCurrentActiveTournamentAsync()
         {
             throw new NotImplementedException();
         }

@@ -20,7 +20,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
         // POST: Account/Register
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(/* RegisterViewModel model */)
+        public async Task<IActionResult> Register1(/* RegisterViewModel model */)
         {
             // TODO: Implement user registration logic
             return View();
@@ -59,7 +59,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
         // POST: Account/RegisterCountry
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RegisterCountry(/* RegisterCountryViewModel model */)
+        public async Task<IActionResult> RegisterCountry1(/* RegisterCountryViewModel model */)
         {
             // TODO: Implement country registration logic
             return View();
