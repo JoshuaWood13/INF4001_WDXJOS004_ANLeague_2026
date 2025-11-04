@@ -18,6 +18,7 @@ appsettings.Production.json
 **/PublishProfiles/
 *.pubxml
 *.PublishSettings
+profile*.json  
 
 # User-specific files
 *.rsuser
