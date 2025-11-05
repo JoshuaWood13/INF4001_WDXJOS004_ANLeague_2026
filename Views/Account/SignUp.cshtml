@@ -1,0 +1,67 @@
+@model INF4001_WDXJOS004_ANLeague_2026.Models.ViewModels.SignUpViewModel
+@using INF4001_WDXJOS004_ANLeague_2026.Data
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Create Representative Account</h3>
+                </div>
+                <div class="card-body">
+
+                    <!-- Form -->
+                    <form asp-action="SignUpUser" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label">Email Address</label>
+                            <input asp-for="Email" class="form-control" placeholder="your.email@example.com" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <!-- Country -->
+                        <div class="mb-3">
+                            <label asp-for="CountryName" class="form-label">Country</label>
+                            <select asp-for="CountryName" class="form-control">
+                                <option hidden disabled selected value="">Select Category</option>
+                                @foreach (var country in CountryList.AfricanCountries)
+                                {
+                                    <option value="@country">@country</option>
+                                }
+                            </select>
+                            <span asp-validation-for="CountryName" class="text-danger"></span>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="mb-3">
+                            <label asp-for="Password" class="form-label">Password</label>
+                            <input asp-for="Password" type="password" class="form-control" placeholder="Minimum 6 characters" />
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+
+                        <!-- Confirm Password -->
+                        <div class="mb-3">
+                            <label asp-for="ConfirmPassword" class="form-label">Confirm Password</label>
+                            <input asp-for="ConfirmPassword" type="password" class="form-control" />
+                            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                        </div>
+
+                        <!-- Button -->
+                        <button type="submit" class="btn btn-primary w-100 mb-3">Create Account</button>
+
+                        <!-- Redirect -->
+                        <div class="text-center">
+                            <p class="mb-0">Already have an account? <a asp-action="Login">Login here</a></p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

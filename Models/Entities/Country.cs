@@ -1,15 +1,41 @@
+using Google.Cloud.Firestore;
+
 namespace INF4001_WDXJOS004_ANLeague_2026.Models.Entities
 {
+    [FirestoreData]
     public class Country
     {
-        public string Id { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty; // African country
-        public string FederationRepresentativeId { get; set; } = string.Empty;
-        public string ManagerName { get; set; } = string.Empty;
-        public string CaptainId { get; set; } = string.Empty;
-        public List<Player> Players { get; set; } = new List<Player>(); // 23 players
-        public double AverageRating { get; set; } // calculated
-        public TeamStatistics Statistics { get; set; } = new TeamStatistics();
+        public Country() { }
+
+        [FirestoreProperty("name")]
+        public string Name { get; set; }
+
+        [FirestoreProperty("federationRepresentativeId")]
+        public string FederationRepresentativeId { get; set; }
+
+        [FirestoreProperty("managerName")]
+        public string? ManagerName { get; set; } 
+
+        [FirestoreProperty("captainId")]
+        public string? CaptainId { get; set; } 
+
+        [FirestoreProperty("players")]
+        public List<Player>? Players { get; set; } 
+
+        [FirestoreProperty("averageRating")]
+        public double AverageRating { get; set; } 
+
+        [FirestoreProperty("isRegisteredForCurrentTournament")]
         public bool IsRegisteredForCurrentTournament { get; set; }
+
+        [FirestoreProperty("isTeamComplete")]
+        public bool IsTeamComplete { get; set; } 
+
+        [FirestoreProperty("statistics")]
+        public TeamStatistics Statistics { get; set; } = new TeamStatistics();
+
+        [FirestoreProperty("createdAt")]
+        public DateTime CreatedAt { get; set; }
     }
 }
+//--------------------------------------------------------X END OF FILE X-------------------------------------------------------------------//

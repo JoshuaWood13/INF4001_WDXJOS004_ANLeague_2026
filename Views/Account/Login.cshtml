@@ -1,8 +1,97 @@
-@{
-    ViewData["Title"] = "Login";
+@inject IConfiguration Configuration
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Login</h3>
+                </div>
+                <div class="card-body">
+
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+                    }
+
+                    <div id="error-message" class="alert alert-danger" style="display: none;"></div>
+
+                    <form id="login-form">
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" id="email" class="form-control" required placeholder="your.email@example.com" />
+                        </div>
+
+                        <!-- Password -->
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" id="password" class="form-control" required />
+                        </div>
+                        
+                        <!-- Button -->
+                        <button type="submit" id="login-btn" class="btn btn-primary w-100 mb-3">
+                            <span id="login-text">Login</span>
+                            <span id="login-spinner" class="spinner-border spinner-border-sm" style="display: none;"></span>
+                        </button>
+
+                        <!-- Redirect -->
+                        <div class="text-center">
+                            <p class="mb-0">Don't have an account? <a asp-action="SignUp">Sign up here</a></p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+    <!-- login script -->
+    <script src="~/js/account-login.js"></script>
+
+    <script>
+        // Initialize Firebase
+        document.addEventListener('DOMContentLoaded', function () {
+            const firebaseConfig = {
+                apiKey: "@Configuration["FirebaseWeb:ApiKey"]",
+                authDomain: "@Configuration["FirebaseWeb:AuthDomain"]",
+                projectId: "@Configuration["FirebaseWeb:ProjectId"]",
+                storageBucket: "@Configuration["FirebaseWeb:StorageBucket"]",
+                messagingSenderId: "@Configuration["FirebaseWeb:MessagingSenderId"]",
+                appId: "@Configuration["FirebaseWeb:AppId"]"
+            };
+
+            initializeFirebase(firebaseConfig);
+
+            // Handle form submission
+            const loginForm = document.getElementById('login-form');
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const loginBtn = document.getElementById('login-btn');
+                const errorMessage = document.getElementById('error-message');
+
+                setButtonLoading(loginBtn, true);
+                hideError(errorMessage);
+
+                // Complete login process, after firebase auth 
+                const result = await handleLogin(email, password, '@Url.Action("LoginCallback", "Account")');
+
+                if (result.success) {
+                    window.location.href = result.redirectUrl;
+                } else {
+                    showError(errorMessage, result.error);
+                    setButtonLoading(loginBtn, false);
+                }
+            });
+        });
+    </script>
 }
-
-<h2>Login</h2>
-
-<!-- TODO: Implement login form with Firebase client SDK -->
-<!-- Login form with Firebase client SDK -->
