@@ -115,7 +115,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
                     return Json(new { success = false, message = "Invalid token" });
                 }
 
-                // Verify the Firebase ID token
+                // Verify firebase ID token
                 var isValid = await _authService.VerifyTokenAsync(model.IdToken);
 
                 if (!isValid)
@@ -159,7 +159,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
                         if (country != null && !country.IsTeamComplete)
                         {
                             // Team setup not complete
-                            redirectUrl = Url.Action("TeamManagement", "Representative") ?? "/Representative/CompleteTeamSetup";
+                            redirectUrl = Url.Action("MyTeam", "Representative") ?? "/Representative/MyTeam";
                         }
                         else
                         {
