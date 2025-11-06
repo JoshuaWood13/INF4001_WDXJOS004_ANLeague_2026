@@ -10,7 +10,8 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Country
         Task<string> CreateCountryAsync(CountryEntity country);
         Task<CountryEntity?> GetCountryByIdAsync(string countryId);
         Task<CountryEntity?> GetCountryByRepresentativeIdAsync(string representativeId);
-        Task<double> CalculateAverageRatingAsync(CountryEntity country);
+        Task<double> CalculateRatingAsync(CountryEntity country);
+        Task UpdateCountryAsync(string countryId, CountryEntity country);
         Task UpdateTeamStatisticsAsync(string countryId, bool won, bool drew, bool tournamentWon);
     }
 }

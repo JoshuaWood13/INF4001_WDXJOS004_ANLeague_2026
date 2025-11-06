@@ -22,8 +22,8 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Models.Entities
         [FirestoreProperty("players")]
         public List<Player>? Players { get; set; } 
 
-        [FirestoreProperty("averageRating")]
-        public double AverageRating { get; set; } 
+        [FirestoreProperty("rating")]
+        public double Rating { get; set; } 
 
         [FirestoreProperty("isRegisteredForCurrentTournament")]
         public bool IsRegisteredForCurrentTournament { get; set; }

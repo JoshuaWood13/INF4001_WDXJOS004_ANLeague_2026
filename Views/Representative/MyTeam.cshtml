@@ -1,10 +1,170 @@
-@{
-    ViewData["Title"] = "My Team";
-}
+@model INF4001_WDXJOS004_ANLeague_2026.Models.ViewModels.TeamDetailsViewModel
 
-<h2>My Team</h2>
+<div class="container mt-4">
 
-<!-- TODO: Implement team details view -->
-<!-- Team header (Country, Manager, Captain) -->
-<!-- Player table (Name, Position, GK/DF/MD/AT ratings) -->
-<!-- Statistics panel (Tournaments Won, Matches, Wins, Losses, W/L%) -->
+    <!-- Header -->
+    <div class="text-center mb-3">
+        <h2 class="fw-bold">@Model.Country.Name National Team</h2>
+    </div>
+
+    <!-- Success/Error Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["InfoMessage"] != null)
+    {
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            @TempData["InfoMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (!Model.Country.IsTeamComplete)
+    {
+        <!-- Team Not Created -->
+        <div class="card shadow mb-4">
+            <div class="card-header bg-warning text-dark">
+                <h3 class="mb-0">Team Not Created</h3>
+            </div>
+            <div class="card-body text-center">
+                <p class="lead">Your team has not been created yet.</p>
+                <p>Create your team with 23 players, select a manager, and choose a captain.</p>
+                <a asp-action="CreateTeam" class="btn btn-primary btn-lg">Create Team</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- Team Header -->
+        <div class="card shadow mb-4">
+            <div class="card-header bg-primary text-white">
+                <h2 class="mb-0">Statistics</h2>
+            </div>
+            <div class="card-body">
+                <div class="row g-3 align-items-center">
+
+                    <!-- Team Info -->
+                    <div class="col-md-4">
+                        <div class="border rounded p-3 h-100">
+                            <div class="mb-2"><strong>Manager</strong></div>
+                            <div class="fs-5">@Model.Country.ManagerName</div>
+                            <hr />
+                            <div class="mb-2"><strong>Captain</strong></div>
+                            <div class="fs-5">@Model.CaptainName</div>
+                            <hr />
+                            <div class="mb-2"><strong>Rating</strong></div>
+                            <div class="fs-4 fw-bold">@Model.Country.Rating.ToString("F2")</div>
+                        </div>
+                    </div>
+
+                    <!-- Team Stats-->
+                    <div class="col-md-8 d-flex align-items-center">
+                        <div class="row g-3 w-100">
+                            <div class="col-6 col-lg-4">
+                                <div class="border rounded text-center p-3 h-100">
+                                    <div class="text-muted">Tournaments Won</div>
+                                    <div class="display-6">@Model.Country.Statistics.TournamentsWon</div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-lg-4">
+                                <div class="border rounded text-center p-3 h-100">
+                                    <div class="text-muted">Matches Played</div>
+                                    <div class="display-6">@Model.Country.Statistics.MatchesPlayed</div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-lg-4">
+                                <div class="border rounded text-center p-3 h-100">
+                                    <div class="text-muted">Wins</div>
+                                    <div class="display-6 text-success">@Model.Country.Statistics.Wins</div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-lg-4">
+                                <div class="border rounded text-center p-3 h-100">
+                                    <div class="text-muted">Losses</div>
+                                    <div class="display-6 text-danger">@Model.Country.Statistics.Losses</div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-lg-4">
+                                <div class="border rounded text-center p-3 h-100">
+                                    <div class="text-muted">Draws</div>
+                                    <div class="display-6">@Model.Country.Statistics.Draws</div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-lg-4">
+                                <div class="border rounded text-center p-3 h-100">
+                                    <div class="text-muted">Win/Loss %</div>
+                                    <div class="display-6">@Model.WinLossPercentage.ToString("F2")%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Players -->
+        <div class="card shadow">
+            <div class="card-header bg-info text-white">
+                <h3 class="mb-0">Players</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Natural Position</th>
+                                <th>GK Rating</th>
+                                <th>DF Rating</th>
+                                <th>MD Rating</th>
+                                <th>AT Rating</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Country.Players != null && Model.Country.Players.Any())
+                            {
+                                @foreach (var player in Model.Country.Players.OrderBy(p => p.NaturalPosition).ThenBy(p => p.Name))
+                                {
+                                    <tr>
+                                        <td>
+                                            @if (player.IsCaptain)
+                                            {
+                                                <span style="color: darkorange; font-weight: 600;">@player.Name (C)</span>
+                                            }
+                                            else
+                                            {
+                                                @player.Name
+                                            }
+                                        </td>
+                                        <td>@player.NaturalPosition</td>
+                                        <td>@player.Ratings.GK</td>
+                                        <td>@player.Ratings.DF</td>
+                                        <td>@player.Ratings.MD</td>
+                                        <td>@player.Ratings.AT</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="6" class="text-center">No players found</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>

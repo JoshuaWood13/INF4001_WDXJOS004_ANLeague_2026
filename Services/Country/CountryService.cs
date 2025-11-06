@@ -47,7 +47,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Country
                     ManagerName = null,
                     CaptainId = null,
                     Players = null,
-                    AverageRating = 0,
+                    Rating = 0,
                     IsRegisteredForCurrentTournament = false,
                     IsTeamComplete = false, 
                     Statistics = new TeamStatistics
@@ -92,19 +92,81 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Country
             }
         }
 
-        public Task<CountryEntity?> GetCountryByIdAsync(string countryId)
+        // Get country by ID
+        public async Task<CountryEntity?> GetCountryByIdAsync(string countryId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                return await _firebaseService.GetDocumentAsync<CountryEntity>("countries", countryId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error getting country by ID {countryId}");
+                return null;
+            }
         }
 
-        public Task<CountryEntity?> GetCountryByRepresentativeIdAsync(string representativeId)
+        // Get country by representative ID
+        public async Task<CountryEntity?> GetCountryByRepresentativeIdAsync(string representativeId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var countries = await _firebaseService.QueryCollectionAsync<CountryEntity>("countries", "federationRepresentativeId", representativeId);
+                return countries.FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error getting country by representative ID {representativeId}");
+                return null;
+            }
         }
 
-        public Task<double> CalculateAverageRatingAsync(CountryEntity country)
+        // Calculate rating for a country
+        public Task<double> CalculateRatingAsync(CountryEntity country)
         {
-            throw new NotImplementedException();
+            try
+            {
+                if (country.Players == null || country.Players.Count == 0)
+                {
+                    return Task.FromResult(0.0);
+                }
+
+                double totalRating = 0;
+                int ratingCount = 0;
+
+                foreach (var player in country.Players)
+                {
+                    totalRating += player.Ratings.GK;
+                    totalRating += player.Ratings.DF;
+                    totalRating += player.Ratings.MD;
+                    totalRating += player.Ratings.AT;
+                    ratingCount += 4; 
+                }
+
+                double averageRating = ratingCount > 0 ? totalRating / ratingCount : 0.0;
+
+                return Task.FromResult(averageRating);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error calculating average rating for country {country.Name}");
+                return Task.FromResult(0.0);
+            }
+        }
+
+        // Update an existing country in Firestore
+        public async Task UpdateCountryAsync(string countryId, CountryEntity country)
+        {
+            try
+            {
+                await _firebaseService.UpdateDocumentAsync("countries", countryId, country);
+                _logger.LogInformation($"Updated country: {country.Name} with ID: {countryId}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error updating country {countryId}");
+                throw;
+            }
         }
 
         public Task UpdateTeamStatisticsAsync(string countryId, bool won, bool drew, bool tournamentWon)

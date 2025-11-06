@@ -90,9 +90,21 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Firebase
             }
         }
 
-        public Task UpdateDocumentAsync<T>(string collection, string documentId, T document) where T : class
+        // Update an existing document in Firestore
+        public async Task UpdateDocumentAsync<T>(string collection, string documentId, T document) where T : class
         {
-            throw new NotImplementedException();
+            try
+            {
+                var docRef = _firestoreDb.Collection(collection).Document(documentId);
+                await docRef.SetAsync(document, SetOptions.MergeAll);
+
+                _logger.LogInformation($"Updated document {documentId} in collection {collection}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error updating document {documentId} in collection {collection}");
+                throw;
+            }
         }
 
         public Task DeleteDocumentAsync(string collection, string documentId)
@@ -100,9 +112,38 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Firebase
             throw new NotImplementedException();
         }
 
-        public Task<List<T>> QueryCollectionAsync<T>(string collection, string field, object value) where T : class
+        // Query a collection by a specific field value and return document ID with entity
+        public async Task<List<(T entity, string documentId)>> QueryCollectionWithIdsAsync<T>(string collection, string field, object value) where T : class
         {
-            throw new NotImplementedException();
+            try
+            {
+                var query = _firestoreDb.Collection(collection).WhereEqualTo(field, value);
+                var snapshot = await query.GetSnapshotAsync();
+
+                return snapshot.Documents.Select(doc => (doc.ConvertTo<T>(), doc.Id)).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error querying collection {collection} by field {field}");
+                throw;
+            }
+        }
+
+        // Query a collection by a specific field value
+        public async Task<List<T>> QueryCollectionAsync<T>(string collection, string field, object value) where T : class
+        {
+            try
+            {
+                var query = _firestoreDb.Collection(collection).WhereEqualTo(field, value);
+                var snapshot = await query.GetSnapshotAsync();
+
+                return snapshot.Documents.Select(doc => doc.ConvertTo<T>()).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error querying collection {collection} by field {field}");
+                throw;
+            }
         }
         //------------------------------------------------------------------------------------------------------------------------------------------//
     }

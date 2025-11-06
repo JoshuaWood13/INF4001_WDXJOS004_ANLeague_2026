@@ -1,0 +1,137 @@
+@model INF4001_WDXJOS004_ANLeague_2026.Models.ViewModels.CreateTeamViewModel
+@using INF4001_WDXJOS004_ANLeague_2026.Models.Enums
+
+<div class="container mt-4">
+
+    <!-- Header -->
+    <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">Create Team - @Model.CountryName</h2>
+        </div>
+        <div class="card-body">
+            <form asp-action="CreateTeam" method="post" id="createTeamForm">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                <input type="hidden" asp-for="CountryId" />
+                <input type="hidden" asp-for="CountryName" />
+                <input type="hidden" id="generatePlayersUrl" data-url="@Url.Action("GeneratePlayers", "Representative")" />
+
+                <!-- Manager Name -->
+                <div class="mb-3">
+                    <div class="row">
+                        <div class="col-sm-8 col-md-6 col-lg-5">
+                            <label asp-for="ManagerName" class="form-label">Manager Name</label>
+                            <input asp-for="ManagerName" class="form-control" placeholder="Enter manager name" required />
+                            <span asp-validation-for="ManagerName" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Players Table -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                        <h4 id="playersHeader" class="mb-0">Players (@Model.Players.Count / 23)</h4>
+                        <button type="button" class="btn btn-outline-success align-self-center" id="generateRandomBtn">
+                            <i class="bi bi-shuffle"></i> Generate Random Team
+                        </button>
+                    </div>
+                    <div id="playersError" class="alert alert-danger" role="alert" style="display: none;"></div>
+                    <div class="table-responsive">
+                        <style>
+                            .captain-cell { text-align: center; vertical-align: middle; }
+                            .captain-radio { transform: scale(1.35); cursor: pointer; }
+                            .actions-cell { text-align: center; vertical-align: middle; }
+                        </style>
+                        <table class="table table-striped table-hover" id="playersTable">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Natural Position</th>
+                                    <th>GK Rating</th>
+                                    <th>DF Rating</th>
+                                    <th>MD Rating</th>
+                                    <th>AT Rating</th>
+                                    <th>Captain</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="playersTableBody">
+                                @if (Model.Players != null && Model.Players.Any())
+                                {
+                                    @for (int i = 0; i < Model.Players.Count; i++)
+                                    {
+                                        <tr data-player-index="@i">
+                                            <td>
+                                                <input type="hidden" name="Players[@i].Id" value="@Model.Players[i].Id" />
+                                                <input type="hidden" name="Players[@i].NaturalPosition" value="@Model.Players[i].NaturalPosition" />
+                                                <input type="text" name="Players[@i].Name" value="@Model.Players[i].Name" class="form-control" required />
+                                            </td>
+                                            <td>
+                                                <select class="form-select natural-pos-select" data-name-prefix="Players[@i]" required>
+                                                    <option value="GK" selected="@(Model.Players[i].NaturalPosition == "GK" ? "selected" : null)">GK</option>
+                                                    <option value="DF" selected="@(Model.Players[i].NaturalPosition == "DF" ? "selected" : null)">DF</option>
+                                                    <option value="MD" selected="@(Model.Players[i].NaturalPosition == "MD" ? "selected" : null)">MD</option>
+                                                    <option value="AT" selected="@(Model.Players[i].NaturalPosition == "AT" ? "selected" : null)">AT</option>
+                                                </select>
+                                            </td>
+                                            <td>
+                                                <input type="number" name="Players[@i].Ratings.GK" value="@Model.Players[i].Ratings.GK" class="form-control" min="0" max="100" required readonly />
+                                            </td>
+                                            <td>
+                                                <input type="number" name="Players[@i].Ratings.DF" value="@Model.Players[i].Ratings.DF" class="form-control" min="0" max="100" required readonly />
+                                            </td>
+                                            <td>
+                                                <input type="number" name="Players[@i].Ratings.MD" value="@Model.Players[i].Ratings.MD" class="form-control" min="0" max="100" required readonly />
+                                            </td>
+                                            <td>
+                                                <input type="number" name="Players[@i].Ratings.AT" value="@Model.Players[i].Ratings.AT" class="form-control" min="0" max="100" required readonly />
+                                            </td>
+                                            <td class="captain-cell">
+                                                <input type="radio" class="form-check-input captain-radio" name="CaptainId" value="@Model.Players[i].Id" 
+                                                       @(Model.Players[i].IsCaptain ? "checked" : "") required />
+                                            </td>
+                                            <td class="actions-cell">
+                                                <button type="button" class="btn btn-sm btn-outline-danger remove-player-btn">Remove</button>
+                                            </td>
+                                        </tr>
+                                    }
+                                    <tr id="addRow">
+                                        <td colspan="7" class="text-center text-muted">Add until there are 23 players.</td>
+                                        <td class="actions-cell">
+                                            <button type="button" class="btn btn-sm btn-outline-primary" id="addPlayerBtn">Add</button>
+                                        </td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    <tr id="addRow">
+                                        <td colspan="7" class="text-center text-muted">Click "Generate Random Team" or add players manually until there are 23.</td>
+                                        <td class="actions-cell">
+                                            <button type="button" class="btn btn-sm btn-outline-primary" id="addPlayerBtn">Add</button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Captain Selection Error -->
+                <div class="mb-3">
+                    <span asp-validation-for="CaptainId" class="text-danger"></span>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Create Team</button>
+                    <a asp-action="MyTeam" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/create-team.js" asp-append-version="true"></script>
+}
