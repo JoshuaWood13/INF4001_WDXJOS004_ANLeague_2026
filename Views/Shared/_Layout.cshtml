@@ -25,16 +25,16 @@
                             <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
 
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-
                         @if (User.Identity.IsAuthenticated)
                         {
                             if (User.IsInRole("Representative"))
                             {
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="Representative" asp-controller="Dashboard" asp-action="Index">Representative Dashboard</a>
+                                    <a class="nav-link text-dark" asp-area="Representative" asp-controller="Representative" asp-action="Dashboard">Dashboard</a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="Representative" asp-controller="Representative" asp-action="MyTeam">Team</a>
                                 </li>
                             }
                             else if (User.IsInRole("Administrator"))
