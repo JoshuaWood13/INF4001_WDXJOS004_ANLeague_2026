@@ -6,10 +6,22 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
     {
         private readonly ILogger<TournamentController> _logger;
 
+        // Constructor
+        //------------------------------------------------------------------------------------------------------------------------------------------//
         public TournamentController(ILogger<TournamentController> logger)
         {
             _logger = logger;
         }
+        //------------------------------------------------------------------------------------------------------------------------------------------//
+
+        // Views
+        //------------------------------------------------------------------------------------------------------------------------------------------//
+        [HttpGet]
+        public IActionResult Tournament()
+        {
+            return View();
+        }
+        
 
         // GET: Tournament/MatchDetails/{matchId}
         public async Task<IActionResult> MatchDetails(string matchId)
@@ -19,5 +31,6 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
             // If "Simulated": Show final score and goal scorers
             return View();
         }
+        //------------------------------------------------------------------------------------------------------------------------------------------//
     }
 }

@@ -1,0 +1,270 @@
+﻿@{
+    var isAuthenticated = User?.Identity?.IsAuthenticated == true;
+    var isRepresentative = isAuthenticated && User.IsInRole("Representative");
+    var isAdmin = isAuthenticated && User.IsInRole("Administrator");
+    var placeholderText = "No team joined";
+    var placeholderScore = "--";
+}
+
+<link rel="stylesheet" href="~/css/tournament-bracket.css" asp-append-version="true" />
+
+<div class="tournament-container">
+    @if (isAdmin)
+    {
+        <div class="admin-action-bar">
+            <button type="button" class="admin-action-btn secondary" data-action="restart">Restart Tournament</button>
+        </div>
+    }
+
+    <div class="tournament-title">
+        <h1>African Nations League Tournament</h1>
+    </div>
+
+    <div class="bracket-wrapper">
+        <div class="bracket-grid">
+            
+            <!-- Column 1: Left Quarter Finals -->
+            <div class="bracket-column quarterfinals left">
+                <!-- Quarter Final 1 -->
+                <div class="match-card-wrapper">
+                    <div class="match-card">
+                        <div class="match-header">Quarter Final 1</div>
+                        <div class="match-body">
+                            <div class="team-row placeholder">
+                                <span class="team-seed placeholder">—</span>
+                                <span class="team-name">@placeholderText</span>
+                                <span class="team-score">@placeholderScore</span>
+                                @if (isRepresentative)
+                                {
+                                    <button type="button" class="join-slot-btn" data-match="QF1" data-slot="home">Join</button>
+                                }
+                            </div>
+                            <div class="team-row placeholder">
+                                <span class="team-seed placeholder">—</span>
+                                <span class="team-name">@placeholderText</span>
+                                <span class="team-score">@placeholderScore</span>
+                                @if (isRepresentative)
+                                {
+                                    <button type="button" class="join-slot-btn" data-match="QF1" data-slot="away">Join</button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    @if (isAdmin)
+                    {
+                        <div class="match-actions">
+                            <button type="button" data-action="play" data-match="QF1">Play</button>
+                            <button type="button" data-action="simulate" data-match="QF1">Simulate</button>
+                        </div>
+                    }
+                </div>
+
+                <!-- Quarter Final 2 -->
+                <div class="match-card-wrapper">
+                    <div class="match-card">
+                        <div class="match-header">Quarter Final 2</div>
+                        <div class="match-body">
+                            <div class="team-row placeholder">
+                                <span class="team-seed placeholder">—</span>
+                                <span class="team-name">@placeholderText</span>
+                                <span class="team-score">@placeholderScore</span>
+                                @if (isRepresentative)
+                                {
+                                    <button type="button" class="join-slot-btn" data-match="QF2" data-slot="home">Join</button>
+                                }
+                            </div>
+                            <div class="team-row placeholder">
+                                <span class="team-seed placeholder">—</span>
+                                <span class="team-name">@placeholderText</span>
+                                <span class="team-score">@placeholderScore</span>
+                                @if (isRepresentative)
+                                {
+                                    <button type="button" class="join-slot-btn" data-match="QF2" data-slot="away">Join</button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    @if (isAdmin)
+                    {
+                        <div class="match-actions">
+                            <button type="button" data-action="play" data-match="QF2">Play</button>
+                            <button type="button" data-action="simulate" data-match="QF2">Simulate</button>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Column 2: Left Semi Final -->
+            <div class="bracket-column semifinals left">
+                <div class="match-card-wrapper">
+                    <div class="match-card">
+                        <div class="match-header">Semi Final 1</div>
+                        <div class="match-body">
+                            <div class="team-row placeholder">
+                                <span class="team-seed placeholder">—</span>
+                                <span class="team-name">Winner Quarter Final 1</span>
+                                <span class="team-score">@placeholderScore</span>
+                            </div>
+                            <div class="team-row placeholder">
+                                <span class="team-seed placeholder">—</span>
+                                <span class="team-name">Winner Quarter Final 2</span>
+                                <span class="team-score">@placeholderScore</span>
+                            </div>
+                        </div>
+                    </div>
+                    @if (isAdmin)
+                    {
+                        <div class="match-actions">
+                            <button type="button" data-action="play" data-match="SF1">Play</button>
+                            <button type="button" data-action="simulate" data-match="SF1">Simulate</button>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Column 3: Final -->
+            <div class="bracket-column final">
+                @if (isAdmin)
+                {
+                    <button type="button" class="admin-action-btn" data-action="start">Start Tournament</button>
+                }
+                <div class="trophy-placeholder" role="presentation"></div>
+                <div class="match-card-wrapper">
+                    <div class="match-card">
+                        <div class="match-header">Final</div>
+                        <div class="match-body">
+                            <div class="team-row placeholder">
+                                <span class="team-seed placeholder">—</span>
+                                <span class="team-name">Winner Semi Final 1</span>
+                                <span class="team-score">@placeholderScore</span>
+                            </div>
+                            <div class="team-row placeholder">
+                                <span class="team-seed placeholder">—</span>
+                                <span class="team-name">Winner Semi Final 2</span>
+                                <span class="team-score">@placeholderScore</span>
+                            </div>
+                        </div>
+                    </div>
+                    @if (isAdmin)
+                    {
+                        <div class="match-actions">
+                            <button type="button" data-action="play" data-match="Final">Play</button>
+                            <button type="button" data-action="simulate" data-match="Final">Simulate</button>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Column 4: Right Semi Final -->
+            <div class="bracket-column semifinals right">
+                <div class="match-card-wrapper">
+                    <div class="match-card">
+                        <div class="match-header">Semi Final 2</div>
+                        <div class="match-body">
+                            <div class="team-row placeholder">
+                                <span class="team-seed placeholder">—</span>
+                                <span class="team-name">Winner Quarter Final 3</span>
+                                <span class="team-score">@placeholderScore</span>
+                            </div>
+                            <div class="team-row placeholder">
+                                <span class="team-seed placeholder">—</span>
+                                <span class="team-name">Winner Quarter Final 4</span>
+                                <span class="team-score">@placeholderScore</span>
+                            </div>
+                        </div>
+                    </div>
+                    @if (isAdmin)
+                    {
+                        <div class="match-actions">
+                            <button type="button" data-action="play" data-match="SF2">Play</button>
+                            <button type="button" data-action="simulate" data-match="SF2">Simulate</button>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Column 5: Right Quarter Finals -->
+            <div class="bracket-column quarterfinals right">
+                <!-- Quarter Final 3 -->
+                <div class="match-card-wrapper">
+                    <div class="match-card">
+                        <div class="match-header">Quarter Final 3</div>
+                        <div class="match-body">
+                            <div class="team-row placeholder">
+                                <span class="team-seed placeholder">—</span>
+                                <span class="team-name">@placeholderText</span>
+                                <span class="team-score">@placeholderScore</span>
+                                @if (isRepresentative)
+                                {
+                                    <button type="button" class="join-slot-btn" data-match="QF3" data-slot="home">Join</button>
+                                }
+                            </div>
+                            <div class="team-row placeholder">
+                                <span class="team-seed placeholder">—</span>
+                                <span class="team-name">@placeholderText</span>
+                                <span class="team-score">@placeholderScore</span>
+                                @if (isRepresentative)
+                                {
+                                    <button type="button" class="join-slot-btn" data-match="QF3" data-slot="away">Join</button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    @if (isAdmin)
+                    {
+                        <div class="match-actions">
+                            <button type="button" data-action="play" data-match="QF3">Play</button>
+                            <button type="button" data-action="simulate" data-match="QF3">Simulate</button>
+                        </div>
+                    }
+                </div>
+
+                <!-- Quarter Final 4 -->
+                <div class="match-card-wrapper">
+                    <div class="match-card">
+                        <div class="match-header">Quarter Final 4</div>
+                        <div class="match-body">
+                            <div class="team-row placeholder">
+                                <span class="team-seed placeholder">—</span>
+                                <span class="team-name">@placeholderText</span>
+                                <span class="team-score">@placeholderScore</span>
+                                @if (isRepresentative)
+                                {
+                                    <button type="button" class="join-slot-btn" data-match="QF4" data-slot="home">Join</button>
+                                }
+                            </div>
+                            <div class="team-row placeholder">
+                                <span class="team-seed placeholder">—</span>
+                                <span class="team-name">@placeholderText</span>
+                                <span class="team-score">@placeholderScore</span>
+                                @if (isRepresentative)
+                                {
+                                    <button type="button" class="join-slot-btn" data-match="QF4" data-slot="away">Join</button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    @if (isAdmin)
+                    {
+                        <div class="match-actions">
+                            <button type="button" data-action="play" data-match="QF4">Play</button>
+                            <button type="button" data-action="simulate" data-match="QF4">Simulate</button>
+                        </div>
+                    }
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // TODO: Add interactivity for match details modal & join actions
+        document.querySelectorAll('.match-card').forEach(card => {
+            card.addEventListener('click', function () {
+                console.log('Match card clicked');
+            });
+        });
+    </script>
+}
