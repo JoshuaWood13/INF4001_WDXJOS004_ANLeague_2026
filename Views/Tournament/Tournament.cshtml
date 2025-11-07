@@ -1,7 +1,6 @@
-﻿@{
-    var isAuthenticated = User?.Identity?.IsAuthenticated == true;
-    var isRepresentative = isAuthenticated && User.IsInRole("Representative");
-    var isAdmin = isAuthenticated && User.IsInRole("Administrator");
+﻿@model INF4001_WDXJOS004_ANLeague_2026.Models.ViewModels.TournamentBracketViewModel
+
+@{
     var placeholderText = "No team joined";
     var placeholderScore = "--";
 }
@@ -9,13 +8,18 @@
 <link rel="stylesheet" href="~/css/tournament-bracket.css" asp-append-version="true" />
 
 <div class="tournament-container">
-    @if (isAdmin)
+
+    <!-- Restart Tournament Button -->
+    @if (Model.IsAdmin)
     {
         <div class="admin-action-bar">
-            <button type="button" class="admin-action-btn secondary" data-action="restart">Restart Tournament</button>
+            <button type="button" class="admin-action-btn secondary" data-action="restart" disabled="@(!Model.CanRestart)">
+                Restart Tournament
+            </button>
         </div>
     }
 
+    <!-- Header -->
     <div class="tournament-title">
         <h1>African Nations League Tournament</h1>
     </div>
@@ -25,70 +29,131 @@
             
             <!-- Column 1: Left Quarter Finals -->
             <div class="bracket-column quarterfinals left">
-                <!-- Quarter Final 1 -->
+
+                <!-- QF 1 -->
                 <div class="match-card-wrapper">
                     <div class="match-card">
+
+                        <!-- Header -->
                         <div class="match-header">Quarter Final 1</div>
                         <div class="match-body">
-                            <div class="team-row placeholder">
-                                <span class="team-seed placeholder">—</span>
-                                <span class="team-name">@placeholderText</span>
-                                <span class="team-score">@placeholderScore</span>
-                                @if (isRepresentative)
+
+                            <!-- Home -->
+                            <div class="team-row @(Model.QF1.HomeCountry == null ? "placeholder" : "")">
+                                <span class="team-seed @(Model.QF1.HomeCountry == null ? "placeholder" : "")">@(Model.QF1.HomeCountry != null ? (Model.SeedCounter++).ToString() : "—")</span>
+                                <span class="team-name">@(Model.QF1.HomeCountry?.Name ?? placeholderText)</span>
+                                @if (Model.ShowRemoveButtons && Model.QF1.HomeCountry != null)
+                                {
+                                    <button type="button" class="remove-country-btn" data-match="QF1" data-slot="home" data-country-id="@Model.QF1.HomeCountry.Id" title="Remove country">✕</button>
+                                }
+                                else
+                                {
+                                    <span class="team-score">@(Model.QF1.HomeCountry != null && Model.QF1.IsMatchCompleted ? Model.QF1.HomeScore.ToString() : placeholderScore)</span>
+                                }
+                                @if (Model.IsRepresentative && !Model.IsUserTeamRegistered && Model.QF1.IsHomeSlotAvailable)
                                 {
                                     <button type="button" class="join-slot-btn" data-match="QF1" data-slot="home">Join</button>
                                 }
                             </div>
-                            <div class="team-row placeholder">
-                                <span class="team-seed placeholder">—</span>
-                                <span class="team-name">@placeholderText</span>
-                                <span class="team-score">@placeholderScore</span>
-                                @if (isRepresentative)
+
+                            <!-- Away -->
+                            <div class="team-row @(Model.QF1.AwayCountry == null ? "placeholder" : "")">
+                                <span class="team-seed @(Model.QF1.AwayCountry == null ? "placeholder" : "")">@(Model.QF1.AwayCountry != null ? (Model.SeedCounter++).ToString() : "—")</span>
+                                <span class="team-name">@(Model.QF1.AwayCountry?.Name ?? placeholderText)</span>
+                                @if (Model.ShowRemoveButtons && Model.QF1.AwayCountry != null)
+                                {
+                                    <button type="button" class="remove-country-btn" data-match="QF1" data-slot="away" data-country-id="@Model.QF1.AwayCountry.Id" title="Remove country">✕</button>
+                                }
+                                else
+                                {
+                                    <span class="team-score">@(Model.QF1.AwayCountry != null && Model.QF1.IsMatchCompleted ? Model.QF1.AwayScore.ToString() : placeholderScore)</span>
+                                }
+                                @if (Model.IsRepresentative && !Model.IsUserTeamRegistered && Model.QF1.IsAwaySlotAvailable)
                                 {
                                     <button type="button" class="join-slot-btn" data-match="QF1" data-slot="away">Join</button>
                                 }
                             </div>
                         </div>
                     </div>
-                    @if (isAdmin)
+
+                    <!-- Match Actions -->
+                    @if (Model.IsAdmin)
                     {
                         <div class="match-actions">
-                            <button type="button" data-action="play" data-match="QF1">Play</button>
-                            <button type="button" data-action="simulate" data-match="QF1">Simulate</button>
+                            @if (Model.QF1.CanBePlayed)
+                            {
+                                <button type="button" data-action="play" data-match="QF1">Play</button>
+                                <button type="button" data-action="simulate" data-match="QF1">Simulate</button>
+                            }
+                            else
+                            {
+                                <button type="button" data-action="play" data-match="QF1" disabled>Play</button>
+                                <button type="button" data-action="simulate" data-match="QF1" disabled>Simulate</button>
+                            }
                         </div>
                     }
                 </div>
 
-                <!-- Quarter Final 2 -->
+                <!-- QF 2 -->
                 <div class="match-card-wrapper">
                     <div class="match-card">
+
+                        <!-- Header -->
                         <div class="match-header">Quarter Final 2</div>
                         <div class="match-body">
-                            <div class="team-row placeholder">
-                                <span class="team-seed placeholder">—</span>
-                                <span class="team-name">@placeholderText</span>
-                                <span class="team-score">@placeholderScore</span>
-                                @if (isRepresentative)
+
+                            <!-- Home -->
+                            <div class="team-row @(Model.QF2.HomeCountry == null ? "placeholder" : "")">
+                                <span class="team-seed @(Model.QF2.HomeCountry == null ? "placeholder" : "")">@(Model.QF2.HomeCountry != null ? (Model.SeedCounter++).ToString() : "—")</span>
+                                <span class="team-name">@(Model.QF2.HomeCountry?.Name ?? placeholderText)</span>
+                                @if (Model.ShowRemoveButtons && Model.QF2.HomeCountry != null)
+                                {
+                                    <button type="button" class="remove-country-btn" data-match="QF2" data-slot="home" data-country-id="@Model.QF2.HomeCountry.Id" title="Remove country">✕</button>
+                                }
+                                else
+                                {
+                                    <span class="team-score">@(Model.QF2.HomeCountry != null && Model.QF2.IsMatchCompleted ? Model.QF2.HomeScore.ToString() : placeholderScore)</span>
+                                }
+                                @if (Model.IsRepresentative && !Model.IsUserTeamRegistered && Model.QF2.IsHomeSlotAvailable)
                                 {
                                     <button type="button" class="join-slot-btn" data-match="QF2" data-slot="home">Join</button>
                                 }
                             </div>
-                            <div class="team-row placeholder">
-                                <span class="team-seed placeholder">—</span>
-                                <span class="team-name">@placeholderText</span>
-                                <span class="team-score">@placeholderScore</span>
-                                @if (isRepresentative)
+
+                            <!-- Away -->
+                            <div class="team-row @(Model.QF2.AwayCountry == null ? "placeholder" : "")">
+                                <span class="team-seed @(Model.QF2.AwayCountry == null ? "placeholder" : "")">@(Model.QF2.AwayCountry != null ? (Model.SeedCounter++).ToString() : "—")</span>
+                                <span class="team-name">@(Model.QF2.AwayCountry?.Name ?? placeholderText)</span>
+                                @if (Model.ShowRemoveButtons && Model.QF2.AwayCountry != null)
+                                {
+                                    <button type="button" class="remove-country-btn" data-match="QF2" data-slot="away" data-country-id="@Model.QF2.AwayCountry.Id" title="Remove country">✕</button>
+                                }
+                                else
+                                {
+                                    <span class="team-score">@(Model.QF2.AwayCountry != null && Model.QF2.IsMatchCompleted ? Model.QF2.AwayScore.ToString() : placeholderScore)</span>
+                                }
+                                @if (Model.IsRepresentative && !Model.IsUserTeamRegistered && Model.QF2.IsAwaySlotAvailable)
                                 {
                                     <button type="button" class="join-slot-btn" data-match="QF2" data-slot="away">Join</button>
                                 }
                             </div>
                         </div>
                     </div>
-                    @if (isAdmin)
+
+                    <!-- Match Actions -->
+                    @if (Model.IsAdmin)
                     {
                         <div class="match-actions">
-                            <button type="button" data-action="play" data-match="QF2">Play</button>
-                            <button type="button" data-action="simulate" data-match="QF2">Simulate</button>
+                            @if (Model.QF2.CanBePlayed)
+                            {
+                                <button type="button" data-action="play" data-match="QF2">Play</button>
+                                <button type="button" data-action="simulate" data-match="QF2">Simulate</button>
+                            }
+                            else
+                            {
+                                <button type="button" data-action="play" data-match="QF2" disabled>Play</button>
+                                <button type="button" data-action="simulate" data-match="QF2" disabled>Simulate</button>
+                            }
                         </div>
                     }
                 </div>
@@ -98,25 +163,41 @@
             <div class="bracket-column semifinals left">
                 <div class="match-card-wrapper">
                     <div class="match-card">
+
+                        <!-- Header -->
                         <div class="match-header">Semi Final 1</div>
                         <div class="match-body">
-                            <div class="team-row placeholder">
-                                <span class="team-seed placeholder">—</span>
-                                <span class="team-name">Winner Quarter Final 1</span>
-                                <span class="team-score">@placeholderScore</span>
+
+                            <!-- Home -->
+                            <div class="team-row @(Model.SF1.HomeCountry == null ? "placeholder" : "")">
+                                <span class="team-seed @(Model.SF1.HomeCountry == null ? "placeholder" : "")">@(Model.SF1.HomeCountry != null ? (Model.SeedCounter++).ToString() : "—")</span>
+                                <span class="team-name">@(Model.SF1.HomeCountry?.Name ?? "Winner Quarter Final 1")</span>
+                                <span class="team-score">@(Model.SF1.HomeCountry != null && Model.SF1.IsMatchCompleted ? Model.SF1.HomeScore.ToString() : placeholderScore)</span>
                             </div>
-                            <div class="team-row placeholder">
-                                <span class="team-seed placeholder">—</span>
-                                <span class="team-name">Winner Quarter Final 2</span>
-                                <span class="team-score">@placeholderScore</span>
+
+                            <!-- Away -->
+                            <div class="team-row @(Model.SF1.AwayCountry == null ? "placeholder" : "")">
+                                <span class="team-seed @(Model.SF1.AwayCountry == null ? "placeholder" : "")">@(Model.SF1.AwayCountry != null ? (Model.SeedCounter++).ToString() : "—")</span>
+                                <span class="team-name">@(Model.SF1.AwayCountry?.Name ?? "Winner Quarter Final 2")</span>
+                                <span class="team-score">@(Model.SF1.AwayCountry != null && Model.SF1.IsMatchCompleted ? Model.SF1.AwayScore.ToString() : placeholderScore)</span>
                             </div>
                         </div>
                     </div>
-                    @if (isAdmin)
+
+                    <!-- Match Actions -->
+                    @if (Model.IsAdmin)
                     {
                         <div class="match-actions">
-                            <button type="button" data-action="play" data-match="SF1">Play</button>
-                            <button type="button" data-action="simulate" data-match="SF1">Simulate</button>
+                            @if (Model.SF1.CanBePlayed)
+                            {
+                                <button type="button" data-action="play" data-match="SF1">Play</button>
+                                <button type="button" data-action="simulate" data-match="SF1">Simulate</button>
+                            }
+                            else
+                            {
+                                <button type="button" data-action="play" data-match="SF1" disabled>Play</button>
+                                <button type="button" data-action="simulate" data-match="SF1" disabled>Simulate</button>
+                            }
                         </div>
                     }
                 </div>
@@ -124,32 +205,55 @@
 
             <!-- Column 3: Final -->
             <div class="bracket-column final">
-                @if (isAdmin)
+
+                <!-- Start Tournament Button -->
+                @if (Model.IsAdmin)
                 {
-                    <button type="button" class="admin-action-btn" data-action="start">Start Tournament</button>
+                    <button type="button" class="admin-action-btn" id="startTournamentBtn" data-action="start" disabled="@(Model.IsStarted || !Model.CanStart)">
+                        Start Tournament
+                    </button>
                 }
+
+                <!-- Trophy Icon -->
                 <div class="trophy-placeholder" role="presentation"></div>
+
                 <div class="match-card-wrapper">
                     <div class="match-card">
+
+                        <!-- Header -->
                         <div class="match-header">Final</div>
                         <div class="match-body">
-                            <div class="team-row placeholder">
-                                <span class="team-seed placeholder">—</span>
-                                <span class="team-name">Winner Semi Final 1</span>
-                                <span class="team-score">@placeholderScore</span>
+
+                            <!-- Home -->
+                            <div class="team-row @(Model.Final.HomeCountry == null ? "placeholder" : "")">
+                                <span class="team-seed @(Model.Final.HomeCountry == null ? "placeholder" : "")">@(Model.Final.HomeCountry != null ? (Model.SeedCounter++).ToString() : "—")</span>
+                                <span class="team-name">@(Model.Final.HomeCountry?.Name ?? "Winner Semi Final 1")</span>
+                                <span class="team-score">@(Model.Final.HomeCountry != null && Model.Final.IsMatchCompleted ? Model.Final.HomeScore.ToString() : placeholderScore)</span>
                             </div>
-                            <div class="team-row placeholder">
-                                <span class="team-seed placeholder">—</span>
-                                <span class="team-name">Winner Semi Final 2</span>
-                                <span class="team-score">@placeholderScore</span>
+
+                            <!-- Away -->
+                            <div class="team-row @(Model.Final.AwayCountry == null ? "placeholder" : "")">
+                                <span class="team-seed @(Model.Final.AwayCountry == null ? "placeholder" : "")">@(Model.Final.AwayCountry != null ? (Model.SeedCounter++).ToString() : "—")</span>
+                                <span class="team-name">@(Model.Final.AwayCountry?.Name ?? "Winner Semi Final 2")</span>
+                                <span class="team-score">@(Model.Final.AwayCountry != null && Model.Final.IsMatchCompleted ? Model.Final.AwayScore.ToString() : placeholderScore)</span>
                             </div>
                         </div>
                     </div>
-                    @if (isAdmin)
+
+                    <!-- Match Actions -->
+                    @if (Model.IsAdmin)
                     {
                         <div class="match-actions">
-                            <button type="button" data-action="play" data-match="Final">Play</button>
-                            <button type="button" data-action="simulate" data-match="Final">Simulate</button>
+                            @if (Model.Final.CanBePlayed)
+                            {
+                                <button type="button" data-action="play" data-match="Final">Play</button>
+                                <button type="button" data-action="simulate" data-match="Final">Simulate</button>
+                            }
+                            else
+                            {
+                                <button type="button" data-action="play" data-match="Final" disabled>Play</button>
+                                <button type="button" data-action="simulate" data-match="Final" disabled>Simulate</button>
+                            }
                         </div>
                     }
                 </div>
@@ -159,25 +263,41 @@
             <div class="bracket-column semifinals right">
                 <div class="match-card-wrapper">
                     <div class="match-card">
+
+                        <!-- Header -->
                         <div class="match-header">Semi Final 2</div>
                         <div class="match-body">
-                            <div class="team-row placeholder">
-                                <span class="team-seed placeholder">—</span>
-                                <span class="team-name">Winner Quarter Final 3</span>
-                                <span class="team-score">@placeholderScore</span>
+
+                            <!-- Home -->
+                            <div class="team-row @(Model.SF2.HomeCountry == null ? "placeholder" : "")">
+                                <span class="team-seed @(Model.SF2.HomeCountry == null ? "placeholder" : "")">@(Model.SF2.HomeCountry != null ? (Model.SeedCounter++).ToString() : "—")</span>
+                                <span class="team-name">@(Model.SF2.HomeCountry?.Name ?? "Winner Quarter Final 3")</span>
+                                <span class="team-score">@(Model.SF2.HomeCountry != null && Model.SF2.IsMatchCompleted ? Model.SF2.HomeScore.ToString() : placeholderScore)</span>
                             </div>
-                            <div class="team-row placeholder">
-                                <span class="team-seed placeholder">—</span>
-                                <span class="team-name">Winner Quarter Final 4</span>
-                                <span class="team-score">@placeholderScore</span>
+
+                            <!-- Away -->
+                            <div class="team-row @(Model.SF2.AwayCountry == null ? "placeholder" : "")">
+                                <span class="team-seed @(Model.SF2.AwayCountry == null ? "placeholder" : "")">@(Model.SF2.AwayCountry != null ? (Model.SeedCounter++).ToString() : "—")</span>
+                                <span class="team-name">@(Model.SF2.AwayCountry?.Name ?? "Winner Quarter Final 4")</span>
+                                <span class="team-score">@(Model.SF2.AwayCountry != null && Model.SF2.IsMatchCompleted ? Model.SF2.AwayScore.ToString() : placeholderScore)</span>
                             </div>
                         </div>
                     </div>
-                    @if (isAdmin)
+
+                    <!-- Match Actions -->
+                    @if (Model.IsAdmin)
                     {
                         <div class="match-actions">
-                            <button type="button" data-action="play" data-match="SF2">Play</button>
-                            <button type="button" data-action="simulate" data-match="SF2">Simulate</button>
+                            @if (Model.SF2.CanBePlayed)
+                            {
+                                <button type="button" data-action="play" data-match="SF2">Play</button>
+                                <button type="button" data-action="simulate" data-match="SF2">Simulate</button>
+                            }
+                            else
+                            {
+                                <button type="button" data-action="play" data-match="SF2" disabled>Play</button>
+                                <button type="button" data-action="simulate" data-match="SF2" disabled>Simulate</button>
+                            }
                         </div>
                     }
                 </div>
@@ -185,86 +305,139 @@
 
             <!-- Column 5: Right Quarter Finals -->
             <div class="bracket-column quarterfinals right">
-                <!-- Quarter Final 3 -->
+
+                <!-- QF 3 -->
                 <div class="match-card-wrapper">
                     <div class="match-card">
+
+                        <!-- Headr -->
                         <div class="match-header">Quarter Final 3</div>
                         <div class="match-body">
-                            <div class="team-row placeholder">
-                                <span class="team-seed placeholder">—</span>
-                                <span class="team-name">@placeholderText</span>
-                                <span class="team-score">@placeholderScore</span>
-                                @if (isRepresentative)
+
+                            <!-- Home -->
+                            <div class="team-row @(Model.QF3.HomeCountry == null ? "placeholder" : "")">
+                                <span class="team-seed @(Model.QF3.HomeCountry == null ? "placeholder" : "")">@(Model.QF3.HomeCountry != null ? (Model.SeedCounter++).ToString() : "—")</span>
+                                <span class="team-name">@(Model.QF3.HomeCountry?.Name ?? placeholderText)</span>
+                                @if (Model.ShowRemoveButtons && Model.QF3.HomeCountry != null)
+                                {
+                                    <button type="button" class="remove-country-btn" data-match="QF3" data-slot="home" data-country-id="@Model.QF3.HomeCountry.Id" title="Remove country">✕</button>
+                                }
+                                else
+                                {
+                                    <span class="team-score">@(Model.QF3.HomeCountry != null && Model.QF3.IsMatchCompleted ? Model.QF3.HomeScore.ToString() : placeholderScore)</span>
+                                }
+                                @if (Model.IsRepresentative && !Model.IsUserTeamRegistered && Model.QF3.IsHomeSlotAvailable)
                                 {
                                     <button type="button" class="join-slot-btn" data-match="QF3" data-slot="home">Join</button>
                                 }
                             </div>
-                            <div class="team-row placeholder">
-                                <span class="team-seed placeholder">—</span>
-                                <span class="team-name">@placeholderText</span>
-                                <span class="team-score">@placeholderScore</span>
-                                @if (isRepresentative)
+
+                            <!-- Away -->
+                            <div class="team-row @(Model.QF3.AwayCountry == null ? "placeholder" : "")">
+                                <span class="team-seed @(Model.QF3.AwayCountry == null ? "placeholder" : "")">@(Model.QF3.AwayCountry != null ? (Model.SeedCounter++).ToString() : "—")</span>
+                                <span class="team-name">@(Model.QF3.AwayCountry?.Name ?? placeholderText)</span>
+                                @if (Model.ShowRemoveButtons && Model.QF3.AwayCountry != null)
+                                {
+                                    <button type="button" class="remove-country-btn" data-match="QF3" data-slot="away" data-country-id="@Model.QF3.AwayCountry.Id" title="Remove country">✕</button>
+                                }
+                                else
+                                {
+                                    <span class="team-score">@(Model.QF3.AwayCountry != null && Model.QF3.IsMatchCompleted ? Model.QF3.AwayScore.ToString() : placeholderScore)</span>
+                                }
+                                @if (Model.IsRepresentative && !Model.IsUserTeamRegistered && Model.QF3.IsAwaySlotAvailable)
                                 {
                                     <button type="button" class="join-slot-btn" data-match="QF3" data-slot="away">Join</button>
                                 }
                             </div>
                         </div>
                     </div>
-                    @if (isAdmin)
+
+                    <!-- Match Actions -->
+                    @if (Model.IsAdmin)
                     {
                         <div class="match-actions">
-                            <button type="button" data-action="play" data-match="QF3">Play</button>
-                            <button type="button" data-action="simulate" data-match="QF3">Simulate</button>
+                            @if (Model.QF3.CanBePlayed)
+                            {
+                                <button type="button" data-action="play" data-match="QF3">Play</button>
+                                <button type="button" data-action="simulate" data-match="QF3">Simulate</button>
+                            }
+                            else
+                            {
+                                <button type="button" data-action="play" data-match="QF3" disabled>Play</button>
+                                <button type="button" data-action="simulate" data-match="QF3" disabled>Simulate</button>
+                            }
                         </div>
                     }
                 </div>
 
-                <!-- Quarter Final 4 -->
+                <!-- QF 4 -->
                 <div class="match-card-wrapper">
                     <div class="match-card">
+
+                        <!-- Header -->
                         <div class="match-header">Quarter Final 4</div>
                         <div class="match-body">
-                            <div class="team-row placeholder">
-                                <span class="team-seed placeholder">—</span>
-                                <span class="team-name">@placeholderText</span>
-                                <span class="team-score">@placeholderScore</span>
-                                @if (isRepresentative)
+
+                            <!-- Home -->
+                            <div class="team-row @(Model.QF4.HomeCountry == null ? "placeholder" : "")">
+                                <span class="team-seed @(Model.QF4.HomeCountry == null ? "placeholder" : "")">@(Model.QF4.HomeCountry != null ? (Model.SeedCounter++).ToString() : "—")</span>
+                                <span class="team-name">@(Model.QF4.HomeCountry?.Name ?? placeholderText)</span>
+                                @if (Model.ShowRemoveButtons && Model.QF4.HomeCountry != null)
+                                {
+                                    <button type="button" class="remove-country-btn" data-match="QF4" data-slot="home" data-country-id="@Model.QF4.HomeCountry.Id" title="Remove country">✕</button>
+                                }
+                                else
+                                {
+                                    <span class="team-score">@(Model.QF4.HomeCountry != null && Model.QF4.IsMatchCompleted ? Model.QF4.HomeScore.ToString() : placeholderScore)</span>
+                                }
+                                @if (Model.IsRepresentative && !Model.IsUserTeamRegistered && Model.QF4.IsHomeSlotAvailable)
                                 {
                                     <button type="button" class="join-slot-btn" data-match="QF4" data-slot="home">Join</button>
                                 }
                             </div>
-                            <div class="team-row placeholder">
-                                <span class="team-seed placeholder">—</span>
-                                <span class="team-name">@placeholderText</span>
-                                <span class="team-score">@placeholderScore</span>
-                                @if (isRepresentative)
+
+                            <!-- Away -->
+                            <div class="team-row @(Model.QF4.AwayCountry == null ? "placeholder" : "")">
+                                <span class="team-seed @(Model.QF4.AwayCountry == null ? "placeholder" : "")">@(Model.QF4.AwayCountry != null ? (Model.SeedCounter++).ToString() : "—")</span>
+                                <span class="team-name">@(Model.QF4.AwayCountry?.Name ?? placeholderText)</span>
+                                @if (Model.ShowRemoveButtons && Model.QF4.AwayCountry != null)
+                                {
+                                    <button type="button" class="remove-country-btn" data-match="QF4" data-slot="away" data-country-id="@Model.QF4.AwayCountry.Id" title="Remove country">✕</button>
+                                }
+                                else
+                                {
+                                    <span class="team-score">@(Model.QF4.AwayCountry != null && Model.QF4.IsMatchCompleted ? Model.QF4.AwayScore.ToString() : placeholderScore)</span>
+                                }
+                                @if (Model.IsRepresentative && !Model.IsUserTeamRegistered && Model.QF4.IsAwaySlotAvailable)
                                 {
                                     <button type="button" class="join-slot-btn" data-match="QF4" data-slot="away">Join</button>
                                 }
                             </div>
                         </div>
                     </div>
-                    @if (isAdmin)
+
+                    <!-- Match Actions -->
+                    @if (Model.IsAdmin)
                     {
                         <div class="match-actions">
-                            <button type="button" data-action="play" data-match="QF4">Play</button>
-                            <button type="button" data-action="simulate" data-match="QF4">Simulate</button>
+                            @if (Model.QF4.CanBePlayed)
+                            {
+                                <button type="button" data-action="play" data-match="QF4">Play</button>
+                                <button type="button" data-action="simulate" data-match="QF4">Simulate</button>
+                            }
+                            else
+                            {
+                                <button type="button" data-action="play" data-match="QF4" disabled>Play</button>
+                                <button type="button" data-action="simulate" data-match="QF4" disabled>Simulate</button>
+                            }
                         </div>
                     }
                 </div>
             </div>
-
         </div>
     </div>
 </div>
 
 @section Scripts {
-    <script>
-        // TODO: Add interactivity for match details modal & join actions
-        document.querySelectorAll('.match-card').forEach(card => {
-            card.addEventListener('click', function () {
-                console.log('Match card clicked');
-            });
-        });
-    </script>
+    <script src="~/js/tournament-bracket.js" asp-append-version="true"></script>
 }
