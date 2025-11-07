@@ -1,9 +1,18 @@
+using Google.Cloud.Firestore;
+
 namespace INF4001_WDXJOS004_ANLeague_2026.Models.Entities
 {
+    [FirestoreData]
     public class TournamentBracket
     {
-        public List<string> QuarterFinals { get; set; } = new List<string>(); // 4 Match IDs
-        public List<string> SemiFinals { get; set; } = new List<string>(); // 2 Match IDs
-        public string Final { get; set; } = string.Empty; // Match ID
+        [FirestoreProperty("quarterFinals")]
+        public List<string> QuarterFinals { get; set; } = new List<string>(); 
+
+        [FirestoreProperty("semiFinals")]
+        public List<string> SemiFinals { get; set; } = new List<string>(); 
+
+        [FirestoreProperty("final")]
+        public string Final { get; set; } = string.Empty; 
     }
 }
+//--------------------------------------------------------X END OF FILE X-------------------------------------------------------------------//
