@@ -191,9 +191,49 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Country
             }
         }
 
-        public Task UpdateTeamStatisticsAsync(string countryId, bool won, bool drew, bool tournamentWon)
+        // Update team statistics after a match
+        public async Task UpdateTeamStatisticsAsync(string countryId, bool won, bool drew, bool tournamentWon)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var country = await GetCountryByIdAsync(countryId);
+
+                if (country == null)
+                {
+                    _logger.LogWarning($"Country with ID {countryId} not found when updating team statistics");
+                    return;
+                }
+
+                // Update statistics
+                country.Statistics.MatchesPlayed++;
+
+                if (won)
+                {
+                    country.Statistics.Wins++;
+                }
+                else if (drew)
+                {
+                    country.Statistics.Draws++;
+                }
+                else
+                {
+                    country.Statistics.Losses++;
+                }
+
+                if (tournamentWon)
+                {
+                    country.Statistics.TournamentsWon++;
+                }
+
+                await UpdateCountryAsync(countryId, country);
+
+                _logger.LogInformation($"Updated statistics for {country.Name}: Played={country.Statistics.MatchesPlayed}, Wins={country.Statistics.Wins}, Losses={country.Statistics.Losses}, Draws={country.Statistics.Draws}, Tournaments={country.Statistics.TournamentsWon}");
+            }
+            catch (Exception ex)
+            { 
+                _logger.LogError(ex, $"Error updating team statistics for country ID {countryId}");
+                throw;
+            }
         }
 
         // Update tournament registration status for a country
@@ -217,6 +257,53 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Country
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error updating tournament registration for country ID {countryId}");
+                throw;
+            }
+        }
+
+        // Update player goal counts after a match
+        public async Task UpdatePlayerGoalsAsync(string countryId, Dictionary<string, int> playerGoalCounts)
+        {
+            try
+            {
+                var country = await GetCountryByIdAsync(countryId);
+
+                if (country == null)
+                {
+                    _logger.LogWarning($"Country with ID {countryId} not found when updating player goals");
+                    return;
+                }
+
+                if (country.Players == null || !country.Players.Any())
+                {
+                    _logger.LogWarning($"Country {country.Name} has no players to update");
+                    return;
+                }
+
+                int updatedCount = 0;
+                foreach (var playerGoal in playerGoalCounts)
+                {
+                    var player = country.Players.FirstOrDefault(p => p.Id == playerGoal.Key);
+                    if (player != null)
+                    {
+                        player.goalsScored += playerGoal.Value;
+                        updatedCount++;
+
+                        _logger.LogInformation($"Updated {player.Name} goals: +{playerGoal.Value} (total: {player.goalsScored})");
+                    }
+                    else
+                    {
+                        _logger.LogWarning($"Player with ID {playerGoal.Key} not found in country {country.Name}");
+                    }
+                }
+
+                await UpdateCountryAsync(countryId, country);
+
+                _logger.LogInformation($"Updated goal counts for {updatedCount} players in {country.Name}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error updating player goals for country ID {countryId}");
                 throw;
             }
         }

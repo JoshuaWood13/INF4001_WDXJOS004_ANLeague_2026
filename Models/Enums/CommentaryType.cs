@@ -7,7 +7,12 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Models.Enums
         Save,
         NearMiss,
         Foul,
+        YellowCard,
+        RedCard,
         HalfTime,
-        FullTime
+        FullTime,
+        ExtraTimeStart,
+        Penalties
     }
 }
+//--------------------------------------------------------X END OF FILE X-------------------------------------------------------------------//

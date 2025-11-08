@@ -143,6 +143,12 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
                     return RedirectToAction("Tournament");
                 }
 
+                if (mode != "play" && mode != "simulate")
+                {
+                    _logger.LogError($"Invalid mode: {mode}");
+                    return RedirectToAction("Tournament");
+                }
+
                 // Get current tournament
                 var tournament = await _tournamentService.GetOrCreateTournamentAsync();
 
@@ -161,108 +167,115 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
                     return RedirectToAction("Tournament");
                 }
 
-                // Get country data with players
-                var homeCountry = await _countryService.GetCountryByIdAsync(match.HomeCountryId);
-                var awayCountry = await _countryService.GetCountryByIdAsync(match.AwayCountryId);
-
-                if (homeCountry == null || awayCountry == null)
-                {
-                    _logger.LogError($"Could not find country data for match {matchId}");
-                    return RedirectToAction("Tournament");
-                }
-
-                // Generate match result based on selected mode
-                List<Models.Entities.CommentaryMoment> commentary = new List<Models.Entities.CommentaryMoment>();
-                List<Models.Entities.Goal> goalScorers = new List<Models.Entities.Goal>();
-                int homeScore = 0;
-                int awayScore = 0;
-                string matchType = "";
-
+                // Generate match result with AI 
+                MatchCommentaryResult matchResult;
                 if (mode == "play")
                 {
-                    // Generate AI commentary (placeholder implementation)
-                    commentary = await _aiCommentaryService.GenerateMatchCommentaryAsync(homeCountry, awayCountry);
-                    
-                    // Extract scores and goals from commentary
-                    var finalMoment = commentary.LastOrDefault();
-                    if (finalMoment != null)
-                    {
-                        homeScore = finalMoment.HomeScore;
-                        awayScore = finalMoment.AwayScore;
-                    }
-
-                    // Extract goals from commentary
-                    goalScorers = commentary
-                        .Where(c => c.Type == Models.Enums.CommentaryType.Goal)
-                        .Select(c => new Models.Entities.Goal
-                        {
-                            PlayerName = c.PlayerName ?? "Unknown",
-                            Minute = c.Minute,
-                            PlayerId = c.PlayerId ?? string.Empty,
-                            CountryId = c.HomeScore > (c.Minute > 45 ? homeScore : 0) ? match.HomeCountryId : match.AwayCountryId
-                        })
-                        .ToList();
-
-                    matchType = "Played";
-
-                    _logger.LogInformation($"Match {matchId} played with AI commentary");
-                }
-                else if (mode == "simulate")
-                {
-                    // Simulate match (placeholder implementation)
-                    var result = await _matchService.SimulateMatchAsync(homeCountry, awayCountry);
-                    homeScore = result.HomeScore;
-                    awayScore = result.AwayScore;
-                    goalScorers = result.GoalScorers;
-                    matchType = "Simulated";
-                    _logger.LogInformation($"Match {matchId} simulated");
+                    matchResult = await _matchService.PlayMatchAsync(match.HomeCountryId, match.AwayCountryId);
                 }
                 else
                 {
-                    _logger.LogError($"Invalid mode: {mode}");
-                    return RedirectToAction("Tournament");
+                    matchResult = await _matchService.SimulateMatchAsync(match.HomeCountryId, match.AwayCountryId);
                 }
 
-                // Determine winner
-                string winnerId = homeScore > awayScore ? match.HomeCountryId : 
-                                 awayScore > homeScore ? match.AwayCountryId : 
-                                 string.Empty; // Draw (shouldn't happen in knockout)
-
-                // Update match in tournament
-                match.HomeScore = homeScore;
-                match.AwayScore = awayScore;
+                // Update match entity with results
+                match.HomeScore = matchResult.HomeScore;
+                match.AwayScore = matchResult.AwayScore;
                 match.Status = "Completed";
-                match.MatchType = matchType;
-                match.WinnerId = winnerId;
-                match.GoalScorers = goalScorers;
-                match.Commentary = commentary;
+                match.MatchType = mode == "play" ? "Played" : "Simulated";
+                match.WinnerId = matchResult.WinnerId;
+                match.GoalScorers = matchResult.GoalScorers;
+                match.Commentary = matchResult.Commentary;
                 match.MatchDate = DateTime.UtcNow;
 
+                // Update tournament with completed match
                 tournament.Matches[matchId] = match;
                 await _firebaseService.UpdateDocumentAsync("tournaments", tournament.Id, tournament);
 
-                // Progress winner to next round
-                if (!string.IsNullOrEmpty(winnerId))
-                {
-                    await _tournamentService.ProgressWinnerToNextRoundAsync(tournament.Id, matchId, winnerId);
-                }
+                _logger.LogInformation($"Match {matchId} completed: {matchResult.HomeCountryName} {matchResult.HomeScore}-{matchResult.AwayScore} {matchResult.AwayCountryName}");
 
-                // Build view model 
+                // Update Firebase in background
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        // Get country data for player goal updates
+                        var homeCountry = await _countryService.GetCountryByIdAsync(match.HomeCountryId);
+                        var awayCountry = await _countryService.GetCountryByIdAsync(match.AwayCountryId);
+
+                        if (homeCountry != null && awayCountry != null)
+                        {
+                            // Update player goal counts for both teams
+                            var homePlayerGoals = matchResult.PlayerGoalCounts
+                                .Where(kvp => homeCountry.Players.Any(p => p.Id == kvp.Key))
+                                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+                            var awayPlayerGoals = matchResult.PlayerGoalCounts
+                                .Where(kvp => awayCountry.Players.Any(p => p.Id == kvp.Key))
+                                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+                            if (homePlayerGoals.Any())
+                            {
+                                await _countryService.UpdatePlayerGoalsAsync(match.HomeCountryId, homePlayerGoals);
+                            }
+
+                            if (awayPlayerGoals.Any())
+                            {
+                                await _countryService.UpdatePlayerGoalsAsync(match.AwayCountryId, awayPlayerGoals);
+                            }
+
+                            // Update team statistics for both teams
+                            bool homeWon = matchResult.WinnerId == match.HomeCountryId;
+                            bool awayWon = matchResult.WinnerId == match.AwayCountryId;
+                            bool isFinalMatch = matchId == "Final";
+
+                            // Update home team statistics
+                            await _countryService.UpdateTeamStatisticsAsync(
+                                match.HomeCountryId,
+                                won: homeWon,
+                                drew: false, // no draws
+                                tournamentWon: isFinalMatch && homeWon
+                            );
+
+                            // Update away team statistics
+                            await _countryService.UpdateTeamStatisticsAsync(
+                                match.AwayCountryId,
+                                won: awayWon,
+                                drew: false, // no draws
+                                tournamentWon: isFinalMatch && awayWon
+                            );
+                        }
+
+                        // Progress winner to next round
+                        if (!string.IsNullOrEmpty(matchResult.WinnerId))
+                        {
+                            await _tournamentService.ProgressWinnerToNextRoundAsync(tournament.Id, matchId, matchResult.WinnerId);
+                        }
+
+                        _logger.LogInformation($"Background updates completed for match {matchId}");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, $"Error in background updates for match {matchId}");
+                    }
+                });
+
+                // Build view model
                 var viewModel = new MatchDetailViewModel
                 {
                     Match = match,
-                    HomeCountryName = homeCountry.Name,
-                    AwayCountryName = awayCountry.Name,
-                    MatchType = matchType == "Played" ? Models.Enums.MatchType.Played : Models.Enums.MatchType.Simulated,
-                    GoalScorers = goalScorers,
-                    Commentary = commentary
+                    HomeCountryName = matchResult.HomeCountryName,
+                    AwayCountryName = matchResult.AwayCountryName,
+                    MatchType = mode == "play" ? Models.Enums.MatchType.Played : Models.Enums.MatchType.Simulated,
+                    GoalScorers = matchResult.GoalScorers,
+                    Commentary = matchResult.Commentary
                 };
 
                 return View(viewModel);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error loading match details for {matchId}");
+                _logger.LogError(ex, $"Error processing match {matchId}");
                 return RedirectToAction("Tournament");
             }
         }
@@ -316,10 +329,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
                 }
 
                 // Calculate if match can be played
-                matchViewModel.CanBePlayed = isTournamentStarted &&
-                                            matchViewModel.HomeCountry != null &&
-                                            matchViewModel.AwayCountry != null &&
-                                            !matchViewModel.IsMatchCompleted;
+                matchViewModel.CanBePlayed = isTournamentStarted && matchViewModel.HomeCountry != null && matchViewModel.AwayCountry != null && !matchViewModel.IsMatchCompleted;
 
                 matchViewModels.Add(matchViewModel);
             }

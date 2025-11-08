@@ -5,9 +5,10 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Match
 {
     public interface IMatchService
     {
-        Task<MatchEntity> SimulateMatchAsync(string matchId);
-        Task<MatchEntity> PlayMatchAsync(string matchId, Func<CommentaryMoment, Task>? commentaryCallback = null);
+        Task<MatchCommentaryResult> SimulateMatchAsync(string homeCountryId, string awayCountryId);
+        Task<MatchCommentaryResult> PlayMatchAsync(string homeCountryId, string awayCountryId);
         Task<MatchEntity?> GetMatchByIdAsync(string matchId);
         Task<List<MatchEntity>> GetMatchesByTournamentAsync(string tournamentId);
     }
 }
+//--------------------------------------------------------X END OF FILE X-------------------------------------------------------------------//
