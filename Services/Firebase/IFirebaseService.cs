@@ -11,5 +11,8 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Firebase
         Task UpdateDocumentAsync<T>(string collection, string documentId, T document) where T : class;
         Task DeleteDocumentAsync(string collection, string documentId);
         Task<List<T>> QueryCollectionAsync<T>(string collection, string field, object value) where T : class;
+        Task<List<(T entity, string documentId)>> QueryCollectionWithIdsAsync<T>(string collection, string field, object value) where T : class;
+        Task<List<(T entity, string documentId)>> GetCollectionWithIdsAsync<T>(string collection) where T : class;
     }
 }
+//--------------------------------------------------------X END OF FILE X-------------------------------------------------------------------//

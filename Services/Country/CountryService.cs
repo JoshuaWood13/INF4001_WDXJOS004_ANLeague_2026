@@ -121,6 +121,28 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Country
             }
         }
 
+        // Get country with document ID by representative ID
+        public async Task<(CountryEntity? entity, string documentId)> GetCountryWithIdByRepresentativeIdAsync(string representativeId)
+        {
+            try
+            {
+                var countries = await _firebaseService.QueryCollectionWithIdsAsync<CountryEntity>("countries", "federationRepresentativeId", representativeId);
+                var countryData = countries.FirstOrDefault();
+                
+                if (countryData.entity == null)
+                {
+                    return (null, string.Empty);
+                }
+
+                return (countryData.entity, countryData.documentId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error getting country with ID by representative ID {representativeId}");
+                return (null, string.Empty);
+            }
+        }
+
         // Calculate rating for a country
         public Task<double> CalculateRatingAsync(CountryEntity country)
         {
@@ -172,6 +194,31 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Country
         public Task UpdateTeamStatisticsAsync(string countryId, bool won, bool drew, bool tournamentWon)
         {
             throw new NotImplementedException();
+        }
+
+        // Update tournament registration status for a country
+        public async Task UpdateTournamentRegistrationAsync(string countryId, bool isRegistered)
+        {
+            try
+            {
+                var country = await GetCountryByIdAsync(countryId);
+                
+                if (country == null)
+                {
+                    _logger.LogWarning($"Country with ID {countryId} not found when updating tournament registration");
+                    return;
+                }
+
+                country.IsRegisteredForCurrentTournament = isRegistered;
+                await UpdateCountryAsync(countryId, country);
+
+                _logger.LogInformation($"Updated tournament registration for country {country.Name} (ID: {countryId}) to {isRegistered}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error updating tournament registration for country ID {countryId}");
+                throw;
+            }
         }
         //------------------------------------------------------------------------------------------------------------------------------------------//
     }

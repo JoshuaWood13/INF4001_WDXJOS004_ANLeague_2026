@@ -145,6 +145,22 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Firebase
                 throw;
             }
         }
+
+        // Get all documents in a collection with their document IDs
+        public async Task<List<(T entity, string documentId)>> GetCollectionWithIdsAsync<T>(string collection) where T : class
+        {
+            try
+            {
+                var snapshot = await _firestoreDb.Collection(collection).GetSnapshotAsync();
+
+                return snapshot.Documents.Select(doc => (doc.ConvertTo<T>(), doc.Id)).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error getting collection {collection} with IDs");
+                throw;
+            }
+        }
         //------------------------------------------------------------------------------------------------------------------------------------------//
     }
 }
