@@ -1,0 +1,119 @@
+@model INF4001_WDXJOS004_ANLeague_2026.Models.ViewModels.LeaderboardViewModel
+
+<link rel="stylesheet" href="~/css/leaderboard.css" asp-append-version="true" />
+
+<div class="container mt-4">
+
+    <!-- Header -->
+    <div class="text-center mb-4">
+        <h2 class="fw-bold">Leaderboard</h2>
+    </div>
+
+    <!-- Top Teams -->
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            <h4 class="mb-0"><i class="bi bi-trophy-fill"></i> Top Teams</h4>
+        </div>
+        <div class="card-body">
+            @if (Model.TopTeams.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Position</th>
+                                <th>Team</th>
+                                <th class="text-center">Tournaments Won</th>
+                                <th class="text-center">Wins</th>
+                                <th class="text-center">Losses</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var team in Model.TopTeams)
+                            {
+                                var positionClass = team.Position switch
+                                {
+                                    1 => "position-gold",
+                                    2 => "position-silver",
+                                    3 => "position-bronze",
+                                    _ => ""
+                                };
+                                
+                                <tr>
+                                    <td>
+                                        <span class="@positionClass">
+                                            @team.Position
+                                        </span>
+                                    </td>
+                                    <td class="fw-bold">@team.TeamName</td>
+                                    <td class="text-center stat-tournaments-won">@team.TournamentsWon</td>
+                                    <td class="text-center stat-wins">@team.Wins</td>
+                                    <td class="text-center stat-losses">@team.Losses</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <p class="text-muted">No team data available yet. Teams will appear here once matches are played.</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Top Players -->
+    <div class="card">
+        <div class="card-header bg-info text-white">
+            <h4 class="mb-0"><i class="bi bi-star-fill"></i> Top Players</h4>
+        </div>
+        <div class="card-body">
+            @if (Model.TopPlayers.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Position</th>
+                                <th>Player</th>
+                                <th>Country</th>
+                                <th class="text-center">Goals</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var player in Model.TopPlayers)
+                            {
+                                var positionClass = player.Position switch
+                                {
+                                    1 => "position-gold",
+                                    2 => "position-silver",
+                                    3 => "position-bronze",
+                                    _ => ""
+                                };
+                                
+                                <tr>
+                                    <td>
+                                        <span class="@positionClass">
+                                            @player.Position
+                                        </span>
+                                    </td>
+                                    <td class="fw-bold">@player.PlayerName</td>
+                                    <td>@player.CountryName</td>
+                                    <td class="text-center stat-goals">@player.Goals</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <p class="text-muted">No player data available yet. Players will appear here once goals are scored.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>

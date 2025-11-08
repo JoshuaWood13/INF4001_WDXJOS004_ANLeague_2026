@@ -145,7 +145,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
                 string redirectUrl;
                 if (role == UserRole.Administrator)
                 {
-                    redirectUrl = Url.Action("Dashboard", "Admin") ?? "/Admin/Dashboard";
+                    redirectUrl = Url.Action("Tournament", "Tournament") ?? "/Tournament/Tournament";
                 }
                 else
                 {
@@ -164,7 +164,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
                         else
                         {
                             // Team is complete
-                            redirectUrl = Url.Action("Dashboard", "Representative") ?? "/Representative/Dashboard";
+                            redirectUrl = Url.Action("Tournament", "Tournament") ?? "/Tournament/Tournament";
                         }
                     }
                     else

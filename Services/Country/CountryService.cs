@@ -1,4 +1,5 @@
 using INF4001_WDXJOS004_ANLeague_2026.Models.Entities;
+using INF4001_WDXJOS004_ANLeague_2026.Models.ViewModels;
 using INF4001_WDXJOS004_ANLeague_2026.Services.Firebase;
 using CountryEntity = INF4001_WDXJOS004_ANLeague_2026.Models.Entities.Country;
 
@@ -304,6 +305,73 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Country
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error updating player goals for country ID {countryId}");
+                throw;
+            }
+        }
+
+        // Get leaderboard data for top teams and top players
+        public async Task<LeaderboardViewModel> GetLeaderboardDataAsync()
+        {
+            try
+            {
+                // Fetch all countries with their IDs
+                var countries = await _firebaseService.GetCollectionWithIdsAsync<CountryEntity>("countries");
+
+                var viewModel = new LeaderboardViewModel();
+
+                // Build top teams
+                var topTeams = countries
+                    .Select(c => new
+                    {
+                        Country = c.entity,
+                        CountryId = c.documentId
+                    })
+                    .OrderByDescending(c => c.Country.Statistics.TournamentsWon)
+                    .ThenByDescending(c => c.Country.Statistics.Wins)
+                    .ThenBy(c => c.Country.Statistics.Losses)
+                    .Take(5)
+                    .Select((c, index) => new TeamLeaderboardEntry
+                    {
+                        Position = index + 1,
+                        TeamName = c.Country.Name,
+                        TournamentsWon = c.Country.Statistics.TournamentsWon,
+                        Wins = c.Country.Statistics.Wins,
+                        Losses = c.Country.Statistics.Losses
+                    })
+                    .ToList();
+
+                viewModel.TopTeams = topTeams;
+
+                // Build top players
+                var allPlayers = countries
+                    .Where(c => c.entity.Players != null && c.entity.Players.Any())
+                    .SelectMany(c => c.entity.Players!
+                        .Where(p => p.goalsScored > 0)
+                        .Select(p => new
+                        {
+                            Player = p,
+                            CountryName = c.entity.Name
+                        }))
+                    .OrderByDescending(p => p.Player.goalsScored)
+                    .Take(10)
+                    .Select((p, index) => new PlayerLeaderboardEntry
+                    {
+                        Position = index + 1,
+                        PlayerName = p.Player.Name,
+                        CountryName = p.CountryName,
+                        Goals = p.Player.goalsScored
+                    })
+                    .ToList();
+
+                viewModel.TopPlayers = allPlayers;
+
+                _logger.LogInformation($"Retrieved leaderboard data: {topTeams.Count} teams, {allPlayers.Count} players");
+
+                return viewModel;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving leaderboard data");
                 throw;
             }
         }

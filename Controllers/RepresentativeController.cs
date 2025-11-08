@@ -30,12 +30,6 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
 
         // Views
         //------------------------------------------------------------------------------------------------------------------------------------------//
-        [HttpGet]
-        public async Task<IActionResult> Dashboard()
-        {
-            // TODO: Display tournament bracket with "Join Tournament" button if eligible
-            return View();
-        }
 
         [HttpGet]
         public async Task<IActionResult> MyTeam()

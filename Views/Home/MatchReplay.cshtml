@@ -1,0 +1,78 @@
+﻿@model INF4001_WDXJOS004_ANLeague_2026.Models.ViewModels.MatchDetailViewModel
+
+<link rel="stylesheet" href="~/css/match-details.css" asp-append-version="true" />
+
+<div class="container mt-4">
+     
+    <!-- Back Button -->
+    <div class="mb-3">
+        <a href="@Url.Action("MatchHighlights", "Home")" class="btn btn-dark">
+            <i class="bi bi-arrow-left"></i> Back to Match Highlights
+        </a>
+    </div>
+
+    <!-- Match Header -->
+    <div class="card shadow mb-4">
+        <div class="card-header text-center bg-success text-white">
+            <h3 class="mb-0">@Model.Match.Round</h3>
+        </div>
+        <div class="card-body">
+            <div class="match-header-content">
+                <div class="team-info home-team">
+                    <h1 class="team-name">@Model.HomeCountryName</h1>
+                    <div class="team-label">Home</div>
+                </div>
+                
+                <!-- Score -->
+                <div class="score-display">
+                    <div>
+                        <span class="score">@Model.Match.HomeScore</span>
+                        <span class="score-separator">-</span>
+                        <span class="score">@Model.Match.AwayScore</span>
+                    </div>
+                    <div class="match-type-badge">@Model.MatchType.ToString()</div>
+                </div>
+                
+                <div class="team-info away-team">
+                    <h1 class="team-name">@Model.AwayCountryName</h1>
+                    <div class="team-label">Away</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Match Events -->
+    <div class="card shadow">
+        <div class="card-header bg-info text-white">
+            <h3 class="mb-0">Match Events</h3>
+        </div>
+        <div class="card-body">
+            @if (Model.Commentary != null && Model.Commentary.Any())
+            {
+                <div class="events-list">
+                    @foreach (var moment in Model.Commentary.OrderBy(c => c.Minute))
+                    {
+                        <div class="event-item @moment.Type.ToString().ToLower()">
+                            <div class="event-header">
+                                <span class="event-time">@moment.Minute'</span>
+                                <span class="event-type">@moment.Type.ToString()</span>
+                            </div>
+                            <div class="event-description">@moment.Description</div>
+                            
+                            @if (moment.Type == INF4001_WDXJOS004_ANLeague_2026.Models.Enums.CommentaryType.Goal)
+                            {
+                                <div class="event-score">Score: @moment.HomeScore - @moment.AwayScore</div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <p class="text-muted">No match events to display</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>

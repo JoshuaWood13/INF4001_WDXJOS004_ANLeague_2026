@@ -1,11 +1,158 @@
+@model INF4001_WDXJOS004_ANLeague_2026.Models.ViewModels.MatchHighlightsViewModel
+
 @{
-    ViewData["Title"] = "Match Highlights";
+    var firstTournament = Model.Tournaments.FirstOrDefault();
+    
+    // Format match titles
+    string GetMatchTitle(string matchId, string round)
+    {
+        var matchTitles = new Dictionary<string, string>
+        {
+            { "QF1", "Quarter Final 1" },
+            { "QF2", "Quarter Final 2" },
+            { "QF3", "Quarter Final 3" },
+            { "QF4", "Quarter Final 4" },
+            { "SF1", "Semi Final 1" },
+            { "SF2", "Semi Final 2" },
+            { "Final", "Final" }
+        };
+        
+        return matchTitles.ContainsKey(matchId) ? matchTitles[matchId] : round;
+    }
 }
 
-<h2>Match Highlights</h2>
+<link rel="stylesheet" href="~/css/match-highlights.css" asp-append-version="true" />
 
-<!-- TODO: Implement match highlights view -->
-<!-- Table/cards listing all matches -->
-<!-- Columns: Round, Home vs Away, Score, Date, Actions -->
-<!-- "View Details" button for each match -->
-<!-- Filter by round (optional) -->
+<div class="container mt-4">
+
+    <!-- Header -->
+    <div class="text-center mb-4">
+        <h2 class="fw-bold">Match Highlights</h2>
+    </div>
+
+    @if (!Model.Tournaments.Any())
+    {
+        <div class="alert alert-info text-center" role="alert">
+            <i class="bi bi-info-circle-fill"></i>
+            <p class="mb-0 mt-2">No completed matches found. Matches will appear here once they are played.</p>
+        </div>
+    }
+    else
+    {
+        <!-- Tournament Header and Selector -->
+        <div class="alert alert-info mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="mb-0" id="currentTournamentTitle">Tournament @firstTournament.TournamentNumber</h3>
+                <select id="tournamentSelector" class="form-select form-select-lg" style="max-width: 500px;">
+                    @foreach (var t in Model.Tournaments)
+                    {
+                        var isSelected = t == firstTournament ? "selected" : null;
+                        var statusLabel = t.Status == "InProgress"
+                        ? " - Current"
+                        : $" - {t.Status} ({t.StartDate:MMM dd, yyyy})";
+
+                        <option value="tournament-@t.TournamentNumber"
+                                data-tournament-number="@t.TournamentNumber"
+                                data-tournament-id="@t.TournamentId"
+                                selected="@isSelected">
+                            Tournament #@t.TournamentNumber@statusLabel
+                        </option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <!-- Tournament Sections -->
+        @foreach (var tournament in Model.Tournaments)
+        {
+            <div class="tournament-section" 
+                 id="tournament-@tournament.TournamentNumber" 
+                 style="@(tournament != firstTournament ? "display: none;" : "")">
+
+                <div class="row g-4">
+                    @foreach (var match in tournament.Matches)
+                    {
+                        var headerColorClass = match.Round switch
+                        {
+                            "QuarterFinal" => "bg-success",
+                            "SemiFinal" => "bg-warning",
+                            "Final" => "bg-info",
+                            _ => "bg-secondary"
+                        };
+                        
+                        <div class="col-md-6">
+                            <div class="card h-100">
+                                <div class="card-header @headerColorClass text-white">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <strong>@GetMatchTitle(match.MatchId, match.Round)</strong>
+                                        @if (!string.IsNullOrEmpty(match.MatchType))
+                                        {
+                                            <span class="badge bg-light text-dark">@match.MatchType</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="card-body">
+
+                                    <!-- Match Score -->
+                                    <div class="text-center mb-3">
+                                        <div class="row align-items-center">
+                                            <div class="col-5">
+                                                <h5 class="mb-0">@match.HomeCountryName</h5>
+                                                <small class="text-muted">Home</small>
+                                            </div>
+                                            <div class="col-2">
+                                                <h3 class="mb-0">@match.HomeScore - @match.AwayScore</h3>
+                                            </div>
+                                            <div class="col-5">
+                                                <h5 class="mb-0">@match.AwayCountryName</h5>
+                                                <small class="text-muted">Away</small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Date -->
+                                    <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top">
+                                        <small class="text-muted">
+                                            <i class="bi bi-clock"></i>
+                                            @match.MatchDate.ToString("MMM dd, yyyy h:mm tt")
+                                        </small>
+
+                                        <!-- Details Button -->
+                                        <a href="@Url.Action("MatchReplay", "Home", new { tournamentId = match.TournamentId, matchId = match.MatchId })" 
+                                           class="btn btn-sm btn-primary">
+                                            <i class="bi bi-play-circle"></i> View Details
+                                        </a>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('tournamentSelector').addEventListener('change', function() {
+            // Hide all tournament sections
+            document.querySelectorAll('.tournament-section').forEach(function(section) {
+                section.style.display = 'none';
+            });
+            
+            // Show selected tournament section
+            var selectedValue = this.value;
+            var selectedSection = document.getElementById(selectedValue);
+            if (selectedSection) {
+                selectedSection.style.display = 'block';
+            }
+            
+            // Update tournament title
+            var selectedOption = this.options[this.selectedIndex];
+            var tournamentNumber = selectedOption.getAttribute('data-tournament-number');
+            document.getElementById('currentTournamentTitle').textContent = 'Tournament ' + tournamentNumber;
+        });
+    </script>
+}

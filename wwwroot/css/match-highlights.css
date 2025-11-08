@@ -1,0 +1,13 @@
+/* Match Highlights CSS */
+
+/* Tournament Section */
+.tournament-section {
+    margin-bottom: 30px;
+}
+
+/* Card hover effect */
+.card:hover {
+    transform: translateY(-3px);
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15) !important;
+}

@@ -12,4 +12,8 @@
     <PackageReference Include="Google_GenerativeAI" Version="3.4.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Views\Admin\" />
+  </ItemGroup>
+
 </Project>

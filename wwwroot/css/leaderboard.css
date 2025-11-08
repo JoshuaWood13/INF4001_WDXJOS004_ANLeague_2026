@@ -1,0 +1,46 @@
+/* Leaderboard CSS */
+
+/* Table Sizing */
+.table thead th {
+    font-size: 1.1rem;
+}
+
+.table tbody td {
+    font-size: 1rem;
+}
+
+/* Position Colors */
+.position-gold {
+    color: #FFD700 !important;
+    font-weight: bold;
+}
+
+.position-silver {
+    color: #C0C0C0 !important;
+    font-weight: bold;
+}
+
+.position-bronze {
+    color: #CD7F32 !important;
+    font-weight: bold;
+}
+
+/* Team Statistics Colors */
+.stat-tournaments-won {
+    color: #198754 !important;
+    font-weight: bold;
+}
+
+.stat-wins {
+    color: #5cb85c !important;
+}
+
+.stat-losses {
+    color: #dc3545 !important;
+}
+
+/* Player Statistics Colors */
+.stat-goals {
+    color: #198754 !important;
+    font-weight: bold;
+}

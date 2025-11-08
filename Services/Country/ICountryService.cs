@@ -1,4 +1,4 @@
-using INF4001_WDXJOS004_ANLeague_2026.Models.Entities;
+using INF4001_WDXJOS004_ANLeague_2026.Models.ViewModels;
 using CountryEntity = INF4001_WDXJOS004_ANLeague_2026.Models.Entities.Country;
 
 namespace INF4001_WDXJOS004_ANLeague_2026.Services.Country
@@ -16,6 +16,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Country
         Task UpdateCountryAsync(string countryId, CountryEntity country);
         Task UpdateTeamStatisticsAsync(string countryId, bool won, bool drew, bool tournamentWon);
         Task UpdatePlayerGoalsAsync(string countryId, Dictionary<string, int> playerGoalCounts);
+        Task<LeaderboardViewModel> GetLeaderboardDataAsync();
     }
 }
 //--------------------------------------------------------X END OF FILE X-------------------------------------------------------------------//
