@@ -22,5 +22,8 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Models.Entities
 
         [FirestoreProperty("isCaptain")]
         public bool IsCaptain { get; set; }
-    }
+
+        [FirestoreProperty("goalsScored")]
+        public int goalsScored { get; set; } = 0;
+        }
 }
