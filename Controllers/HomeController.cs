@@ -26,11 +26,6 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
 
         // Views
         //------------------------------------------------------------------------------------------------------------------------------------------//
-        public IActionResult Index()
-        {
-            return View();
-        }
-
         // Get tournamnet and match data to display
         [HttpGet]
         public async Task<IActionResult> MatchHighlights(int? tournamentNumber = null)

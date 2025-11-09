@@ -35,7 +35,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
         {
             if (User.Identity?.IsAuthenticated == true)
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Tournament", "Tournament");
             }
 
             return View();
@@ -45,7 +45,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
         {
             if (User.Identity?.IsAuthenticated == true)
             {
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Tournament", "Tournament");
             }
 
             return View();
@@ -175,7 +175,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
                     else
                     {
                         // No country found
-                        redirectUrl = Url.Action("Index", "Home") ?? "/";
+                        redirectUrl = Url.Action("Tournament", "Tournament") ?? "/";
                     }
                 }
 
@@ -201,7 +201,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
             // Clear authentication cookie
             Response.Cookies.Delete("FirebaseToken");
 
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Tournament", "Tournament");
         }
         //------------------------------------------------------------------------------------------------------------------------------------------//
     }

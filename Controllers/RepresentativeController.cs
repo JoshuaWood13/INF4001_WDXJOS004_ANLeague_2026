@@ -47,7 +47,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
                 if (country == null)
                 {
                     TempData["ErrorMessage"] = errorMessage ?? "Country not found.";
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction("Tournament", "Tournament");
                 }
 
                 // Build view model
@@ -85,7 +85,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
                 _logger.LogError(ex, "Error loading MyTeam page");
                 TempData["ErrorMessage"] = "An error occurred while loading your team details.";
 
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Tournament", "Tournament");
             }
         }
 
@@ -106,7 +106,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
                 if (country == null)
                 {
                     TempData["ErrorMessage"] = errorMessage ?? "Country not found. Please contact support.";
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction("Tournament", "Tournament");
                 }
 
                 // Check if team is already complete

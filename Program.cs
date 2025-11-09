@@ -49,9 +49,6 @@ namespace INF4001_WDXJOS004_ANLeague_2026
             builder.Services.AddScoped<IAICommentaryService, AICommentaryService>();
             builder.Services.AddScoped<IEmailService, EmailService>();
 
-            // TODO: Configure Firebase Admin SDK
-            // TODO: Configure authentication middleware
-
             // Add session support
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession(options =>
@@ -97,7 +94,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}");
+                pattern: "{controller=Tournament}/{action=Tournament}/{id?}");
 
             app.Run();
         }
