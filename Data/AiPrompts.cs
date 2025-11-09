@@ -105,8 +105,6 @@ IMPORTANT:
 - The final event contains the final scores
 - NO outer JSON structure, NO array brackets
 - Each line must be parseable as standalone JSON
-- ""minute"" field: INTEGER only
-- ""eventType"" field: Must be ""Goal""
 - ""playerName"" field: Exact attacker name from squad lists
 
 Generate realistic match with varied outcomes!";
