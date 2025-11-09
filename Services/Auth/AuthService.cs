@@ -18,7 +18,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Auth
 
         // Methods
         //------------------------------------------------------------------------------------------------------------------------------------------//
-        // Verify a Firebase ID token
+        // Verify a firebase ID token
         public async Task<bool> VerifyTokenAsync(string idToken)
         {
             try
@@ -33,7 +33,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Auth
             }
         }
 
-        // Create a new Firebase user with role-based access
+        // Create a new firebase user with role-based access
         public async Task<string> CreateUserAsync(string email, string password, UserRole role)
         {
             try
@@ -121,7 +121,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Auth
             }
         }
 
-        // Get user role from a Firebase ID token
+        // Get user role from a firebase ID token
         public Task<UserRole?> GetUserRoleAsync(string idToken)
         {
             try
@@ -145,7 +145,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Auth
             }
         }
 
-        // Get user ID from a Firebase ID token
+        // Get user ID from a firebase ID token
         public async Task<string?> GetUserIdAsync(string idToken)
         {
             try
@@ -160,7 +160,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Auth
             }
         }
 
-        // Get user email from a Firebase ID token
+        // Get user email from a firbase ID token
         public async Task<string?> GetUserEmailAsync(string idToken)
         {
             try
@@ -177,7 +177,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Auth
             }
         }
 
-        // Create ClaimsPrincipal from Firebase ID token
+        // Create ClaimsPrincipal from firebase ID token
         public async Task<ClaimsPrincipal?> GetClaimsPrincipalAsync(string idToken)
         {
             try

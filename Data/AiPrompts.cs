@@ -1,5 +1,6 @@
 namespace INF4001_WDXJOS004_ANLeague_2026.Data
 {
+    // Used Claude & ChatGPT to help me create and refine these prompts
     public static class AiPrompts
     {
         // Prompt for detailed AI play-by-play match commentary

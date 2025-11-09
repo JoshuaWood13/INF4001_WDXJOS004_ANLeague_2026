@@ -32,7 +32,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
         {
             try
             {
-                // Get all tournaments and countries from Firebase
+                // Get all tournaments and countries from firebase
                 var tournamentsTask = _firebaseService.GetCollectionAsync<TournamentEntity>("tournaments");
                 var countriesTask = _firebaseService.GetCollectionWithIdsAsync<Models.Entities.Country>("countries");
 

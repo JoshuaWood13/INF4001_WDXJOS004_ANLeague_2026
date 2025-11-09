@@ -304,14 +304,6 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
             }
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> JoinTournament(string tournamentId)
-        {
-            // TODO: Register country for tournament
-            return RedirectToAction("Dashboard");
-        }
-
         // Get current user's country
         private async Task<(User? user, Country? country, string? errorMessage)> GetCurrentUserCountryAsync()
         {

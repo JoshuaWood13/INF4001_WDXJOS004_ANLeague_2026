@@ -2,7 +2,6 @@ using INF4001_WDXJOS004_ANLeague_2026.Middleware;
 using INF4001_WDXJOS004_ANLeague_2026.Services.AICommentary;
 using INF4001_WDXJOS004_ANLeague_2026.Services.Auth;
 using INF4001_WDXJOS004_ANLeague_2026.Services.Country;
-using INF4001_WDXJOS004_ANLeague_2026.Services.Email;
 using INF4001_WDXJOS004_ANLeague_2026.Services.Firebase;
 using INF4001_WDXJOS004_ANLeague_2026.Services.Match;
 using INF4001_WDXJOS004_ANLeague_2026.Services.PlayerGenerator;
@@ -47,7 +46,6 @@ namespace INF4001_WDXJOS004_ANLeague_2026
             builder.Services.AddScoped<ITournamentService, TournamentService>();
             builder.Services.AddScoped<IMatchService, MatchService>();
             builder.Services.AddScoped<IAICommentaryService, AICommentaryService>();
-            builder.Services.AddScoped<IEmailService, EmailService>();
 
             // Add session support
             builder.Services.AddDistributedMemoryCache();

@@ -1,5 +1,4 @@
 using INF4001_WDXJOS004_ANLeague_2026.Models.Entities;
-using INF4001_WDXJOS004_ANLeague_2026.Models.Enums;
 
 namespace INF4001_WDXJOS004_ANLeague_2026.Models.ViewModels
 {
@@ -15,3 +14,4 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Models.ViewModels
         public string Mode { get; set; } = string.Empty;
     }
 }
+//--------------------------------------------------------X END OF FILE X-------------------------------------------------------------------//

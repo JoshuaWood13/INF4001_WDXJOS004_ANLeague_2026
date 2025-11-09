@@ -55,7 +55,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Firebase
             }
         }
 
-        // Add a new document to Firestore with auto-generated ID
+        // Add a new document to firestore with auto-generated ID
         public async Task<string> AddDocumentAsync<T>(string collection, T document) where T : class
         {
             try
@@ -73,7 +73,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Firebase
             }
         }
 
-        // Add a new document to Firestore with specific ID
+        // Add a new document to firestore with specific ID
         public async Task AddDocumentWithIdAsync<T>(string collection, string documentId, T document) where T : class
         {
             try
@@ -90,7 +90,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Firebase
             }
         }
 
-        // Update an existing document in Firestore
+        // Update an existing document in firestore
         public async Task UpdateDocumentAsync<T>(string collection, string documentId, T document) where T : class
         {
             try

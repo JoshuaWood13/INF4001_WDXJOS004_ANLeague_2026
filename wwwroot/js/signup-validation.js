@@ -2,7 +2,7 @@
 
 $(document).ready(function () {
     
-    // Reset submit button on page load (in case of server-side error)
+    // Reset submit button on page load 
     var $submitBtn = $('#signUpForm button[type="submit"]');
     $submitBtn.prop('disabled', false).html('Create Account');
     

@@ -12,7 +12,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Models.ViewModels
         public int RegisteredTeamsCount { get; set; }
         public bool CanStart { get; set; } // 8 teams + registration status
         public bool IsStarted { get; set; } // In progress or completed
-        public bool CanRestart { get; set; } // Must be started or in progress)
+        public bool CanRestart { get; set; } // Must be started or in progress
         public bool ShowRemoveButtons { get; set; } // Admin + registration status
         
         // User Info

@@ -217,7 +217,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Tournament
             }
         }
 
-        // Restarts and creates a new tournament using the last tournaments original quarter-final countries
+        // Restarts and creates a new tournament using the last tournaments original QF countries
         public async Task<TournamentEntity> RestartTournamentAsync()
         {
             try
@@ -352,119 +352,6 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Tournament
                 throw;
             }
         }
-
-        // TESTING METHOD: Create a fully populated tournament with all existing countries (Used Claude to generate)
-        //public async Task<TournamentEntity> CreateFullyPopulatedTournamentForTestingAsync()
-        //{
-        //    try
-        //    {
-        //        _logger.LogInformation("Creating fully populated tournament for testing...");
-
-        //        // Get all countries with their document IDs
-        //        var allCountries = await _firebaseService.GetCollectionWithIdsAsync<CountryEntity>("countries");
-
-        //        if (allCountries.Count != 8)
-        //        {
-        //            _logger.LogWarning($"Expected 8 countries, found {allCountries.Count}. Proceeding anyway...");
-        //        }
-
-        //        // Reset all countries' registration status to false (parallel updates)
-        //        var resetTasks = new List<Task>();
-        //        foreach (var (country, countryId) in allCountries)
-        //        {
-        //            country.IsRegisteredForCurrentTournament = false;
-        //            resetTasks.Add(_firebaseService.UpdateDocumentAsync("countries", countryId, country));
-        //        }
-        //        await Task.WhenAll(resetTasks);
-
-        //        _logger.LogInformation($"Reset registration status for {allCountries.Count} countries");
-
-        //        // Create a new tournament
-        //        var tournamentId = await CreateNewTournamentAsync();
-        //        var tournament = await _firebaseService.GetDocumentAsync<TournamentEntity>("tournaments", tournamentId);
-
-        //        if (tournament == null)
-        //        {
-        //            throw new Exception("Failed to create tournament");
-        //        }
-
-        //        // Add all countries to the tournament (2 per quarter-final match)
-        //        var quarterFinalMatches = new[] { "QF1", "QF2", "QF3", "QF4" };
-        //        var slots = new[] { "home", "away" };
-                
-        //        int countryIndex = 0;
-        //        foreach (var matchId in quarterFinalMatches)
-        //        {
-        //            foreach (var slot in slots)
-        //            {
-        //                if (countryIndex < allCountries.Count)
-        //                {
-        //                    var (country, countryId) = allCountries[countryIndex];
-                            
-        //                    // Create or update match in tournament
-        //                    if (!tournament.Matches.ContainsKey(matchId))
-        //                    {
-        //                        tournament.Matches[matchId] = new MatchEntity
-        //                        {
-        //                            Id = matchId,
-        //                            TournamentId = tournament.Id,
-        //                            Round = GetRoundFromMatchId(matchId),
-        //                            Status = MatchStatus.Scheduled.ToString(),
-        //                            MatchDate = DateTime.UtcNow,
-        //                            HomeCountryId = string.Empty,
-        //                            AwayCountryId = string.Empty
-        //                        };
-        //                    }
-
-        //                    // Assign country to slot
-        //                    if (slot == "home")
-        //                    {
-        //                        tournament.Matches[matchId].HomeCountryId = countryId;
-        //                    }
-        //                    else
-        //                    {
-        //                        tournament.Matches[matchId].AwayCountryId = countryId;
-        //                    }
-
-        //                    // Add to registered countries
-        //                    if (!tournament.RegisteredCountries.Contains(countryId))
-        //                    {
-        //                        tournament.RegisteredCountries.Add(countryId);
-        //                    }
-
-        //                    // Update bracket
-        //                    UpdateBracketWithMatch(tournament.Bracket, matchId);
-
-        //                    // Update country registration status in memory (batch update later)
-        //                    country.IsRegisteredForCurrentTournament = true;
-
-        //                    _logger.LogInformation($"Added {country.Name} to {matchId} ({slot} slot)");
-
-        //                    countryIndex++;
-        //                }
-        //            }
-        //        }
-
-        //        // Batch update all country registration statuses in parallel
-        //        var registrationUpdateTasks = allCountries
-        //            .Take(countryIndex)
-        //            .Select(c => _firebaseService.UpdateDocumentAsync("countries", c.documentId, c.entity))
-        //            .ToList();
-        //        await Task.WhenAll(registrationUpdateTasks);
-
-        //        // Save the fully populated tournament
-        //        await _firebaseService.UpdateDocumentAsync("tournaments", tournament.Id, tournament);
-
-        //        _logger.LogInformation($"Successfully created fully populated tournament with {tournament.RegisteredCountries.Count} countries");
-
-        //        return tournament;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex, "Error creating fully populated tournament for testing");
-        //        throw;
-        //    }
-        //}
 
         // Join an open match slot in the current tournament and update the tournament, match, and country data.
         public async Task<JoinTournamentResult> JoinTournamentSlotAsync(string matchId, string countryId, string slot)

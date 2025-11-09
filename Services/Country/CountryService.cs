@@ -36,7 +36,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Country
             }
         }
 
-        // Create a new country in Firestore with only necessary initial data
+        // Create a new country in firestore with only necessary initial data
         public async Task<string> CreateInitialCountryAsync(string countryName, string representativeId)
         {
             try
@@ -76,7 +76,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Country
             }
         }
 
-        // Create a new country in Firestore
+        // Create a new country in firestore
         public async Task<string> CreateCountryAsync(CountryEntity country)
         {
             try
@@ -145,7 +145,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Country
             }
         }
 
-        // Get country with document ID by representative ID
+        // Get country with document ID from representative ID
         public async Task<(CountryEntity? entity, string documentId)> GetCountryWithIdByRepresentativeIdAsync(string representativeId)
         {
             try
@@ -219,7 +219,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Country
             }
         }
 
-        // Update an existing country in Firestore
+        // Update an existing country in firestore
         public async Task UpdateCountryAsync(string countryId, CountryEntity country)
         {
             try
