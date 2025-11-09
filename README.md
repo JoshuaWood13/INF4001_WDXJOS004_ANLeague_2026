@@ -4,7 +4,7 @@
 
 ## Live Demo
 
-**Deployment:** [https://african-nations-league-wdxjos004-fda5defucdgnhdax.southafricanorth-01.azurewebsites.net/](https://african-nations-league-wdxjos004-fda5defucdgnhdax.southafricanorth-01.azurewebsites.net/)
+🔗 **Deployment:** [https://african-nations-league-wdxjos004-fda5defucdgnhdax.southafricanorth-01.azurewebsites.net/](https://african-nations-league-wdxjos004-fda5defucdgnhdax.southafricanorth-01.azurewebsites.net/)
 
 ## Login Credentials
 
@@ -15,11 +15,10 @@ Password: Password123!
 ```
 
 ## Bonus Features Implemented
-- Analytics for team performance for representatives to view
-- Past performances of teams (after a reset is done)
-- Past finalists and winners
-- Remove a team to let another team join
-
+✅ Analytics for team performance for representatives to view <br>
+✅ Past performances of teams (after a reset is done) <br>
+✅ Past finalists and winners <br>
+✅ Remove a team to let another team join <br>
 
 ## Technologies Used
 
