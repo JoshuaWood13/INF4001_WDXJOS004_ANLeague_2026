@@ -11,5 +11,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Models.ViewModels
         public Enums.MatchType MatchType { get; set; }
         public List<Goal> GoalScorers { get; set; } = new List<Goal>();
         public List<CommentaryMoment> Commentary { get; set; } = new List<CommentaryMoment>();
+        public bool IsLoading { get; set; } = false;
+        public string Mode { get; set; } = string.Empty;
     }
 }

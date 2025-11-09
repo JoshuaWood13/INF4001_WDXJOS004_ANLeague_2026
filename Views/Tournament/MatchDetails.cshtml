@@ -2,19 +2,26 @@
 
 <link rel="stylesheet" href="~/css/match-details.css" asp-append-version="true" />
 
-<div class="container mt-4">
-
-    <!-- Back Button -->
-    <div class="mb-3">
-        <a href="@Url.Action("Tournament", "Tournament")" class="btn btn-dark">
-            <i class="bi bi-arrow-left"></i> Back to Tournament
-        </a>
+@if (Model.IsLoading)
+{
+    <!-- Data container for JS -->
+    <div id="matchDetailsData" 
+         data-match-id="@Model.Match.Id" 
+         data-mode="@Model.Mode" 
+         data-stream-url="@Url.Action("StreamMatchCommentary", "Tournament")?matchId=@Model.Match.Id&mode=@Model.Mode" 
+         style="display: none;">
     </div>
+}
+
+<div class="container mt-4">
 
     <!-- Match Header -->
     <div class="card shadow mb-4">
-        <div class="card-header text-center bg-success text-white">
-            <h3 class="mb-0">@Model.Match.Round</h3>
+        <div class="card-header bg-success text-white position-relative">
+            <a href="@Url.Action("Tournament", "Tournament")" class="btn btn-outline-dark btn-sm position-absolute" style="left: 15px; top: 50%; transform: translateY(-50%);">
+                Back
+            </a>
+            <h3 class="mb-0 text-center">@Model.Match.Round</h3>
         </div>
         <div class="card-body">
             <div class="match-header-content">
@@ -26,9 +33,9 @@
                 <!-- Score -->
                 <div class="score-display">
                     <div>
-                        <span class="score">@Model.Match.HomeScore</span>
+                        <span class="score" id="homeScore">@Model.Match.HomeScore</span>
                         <span class="score-separator">-</span>
-                        <span class="score">@Model.Match.AwayScore</span>
+                        <span class="score" id="awayScore">@Model.Match.AwayScore</span>
                     </div>
                     <div class="match-type-badge">@Model.MatchType.ToString()</div>
                 </div>
@@ -47,9 +54,19 @@
             <h3 class="mb-0">Match Events</h3>
         </div>
         <div class="card-body">
-            @if (Model.Commentary != null && Model.Commentary.Any())
+            @if (Model.IsLoading)
             {
-                <div class="events-list">
+                <div id="loadingState" class="text-center py-5">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <h5 class="text-muted">Generating match commentary...</h5>
+                    <p class="text-muted">Events will appear as they unfold</p>
+                </div>
+            }
+            <div id="eventsList" class="events-list" style="@(Model.IsLoading ? "display:none;" : "")">
+                @if (Model.Commentary != null && Model.Commentary.Any())
+                {
                     @foreach (var moment in Model.Commentary.OrderBy(c => c.Minute))
                     {
                         <div class="event-item @moment.Type.ToString().ToLower()">
@@ -65,14 +82,13 @@
                             }
                         </div>
                     }
-                </div>
-            }
-            else
-            {
-                <div class="text-center py-5">
-                    <p class="text-muted">No match events to display</p>
-                </div>
-            }
+                }
+            </div>
         </div>
     </div>
 </div>
+
+@if (Model.IsLoading)
+{
+    <script src="~/js/match-details.js" asp-append-version="true"></script>
+}

@@ -1,11 +1,11 @@
-/* Match Details CSS */
+/* Match Details CSS (used Claude to help create this file)*/
 
 .match-header-content {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 30px;
-    padding: 20px 0;
+    gap: 25px;
+    padding: 15px 0;
 }
 
 .team-info {
@@ -14,68 +14,104 @@
 }
 
 .team-name {
-    font-size: 2rem;
+    font-size: 1.75rem;
     font-weight: bold;
-    margin: 0 0 5px 0;
+    margin: 0 0 3px 0;
     color: #333;
 }
 
 .team-label {
-    font-size: 0.875rem;
+    font-size: 0.8rem;
     color: #999;
     text-transform: uppercase;
     letter-spacing: 1px;
 }
 
-/* Score Display */
+/* Score display */
 .score-display {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
 }
 
 .score-display > div:first-child {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 18px;
 }
 
 .score {
-    font-size: 3.5rem;
+    font-size: 3rem;
     font-weight: bold;
-    min-width: 70px;
+    min-width: 60px;
     text-align: center;
     color: #333;
 }
 
 .score-separator {
-    font-size: 2.5rem;
+    font-size: 2.2rem;
     font-weight: 300;
     color: #666;
 }
 
 .match-type-badge {
-    font-size: 0.875rem;
+    font-size: 0.8rem;
     color: #666;
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin-top: 5px;
+    margin-top: 3px;
 }
 
-/* Events List */
+/* Events list */
 .events-list {
     display: flex;
     flex-direction: column;
     gap: 15px;
 }
 
+/* Restrict events list height to fit 3 events */
+#eventsList {
+    max-height: 255px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 10px;
+    padding-bottom: 8px;
+}
+
+/* Custom scrollbar styling */
+#eventsList::-webkit-scrollbar {
+    width: 8px;
+}
+
+#eventsList::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+#eventsList::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+#eventsList::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Event items - reduced sizing for 4 events to fit */
 .event-item {
-    padding: 15px 20px;
+    padding: 10px 14px;
     border-left: 4px solid #ddd;
     background: #f8f9fa;
-    border-radius: 8px;
+    border-radius: 6px;
     transition: all 0.3s ease;
+    margin-bottom: 0.7rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.event-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
 }
 
 .event-item:hover {
@@ -86,36 +122,36 @@
 
 .event-header {
     display: flex;
-    gap: 15px;
+    gap: 12px;
     align-items: baseline;
-    margin-bottom: 8px;
+    margin-bottom: 0.35rem;
 }
 
 .event-time {
     font-weight: bold;
-    font-size: 1rem;
+    font-size: 0.85rem;
     color: #667eea;
-    min-width: 45px;
+    min-width: 40px;
 }
 
 .event-type {
-    font-size: 1.1rem;
+    font-size: 0.85rem;
     color: #333;
     font-weight: bold;
 }
 
 .event-description {
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: #495057;
-    line-height: 1.6;
-    margin-bottom: 5px;
+    line-height: 1.35;
+    margin-bottom: 0.25rem;
 }
 
 .event-score {
-    font-size: 0.875rem;
+    font-size: 0.8rem;
     color: #6c757d;
     font-weight: 500;
-    margin-top: 5px;
+    margin-top: 0.25rem;
 }
 
 /* Event Type Colors */
@@ -185,6 +221,13 @@
 .event-item.extratimestart .event-time,
 .event-item.penalties .event-time {
     color: #9C27B0;
+}
+
+/* Score Pulse Animation */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); color: #28a745; }
+    100% { transform: scale(1); }
 }
 
 /* Responsive Design */

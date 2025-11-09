@@ -29,8 +29,9 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Match
             _logger.LogInformation($"Playing match between {homeCountryId} and {awayCountryId}");
 
             // Get country data with players
-            var homeCountry = await _countryService.GetCountryByIdAsync(homeCountryId);
-            var awayCountry = await _countryService.GetCountryByIdAsync(awayCountryId);
+            var countries = await _countryService.GetCountriesByIdsAsync(new List<string> { homeCountryId, awayCountryId });
+            countries.TryGetValue(homeCountryId, out var homeCountry);
+            countries.TryGetValue(awayCountryId, out var awayCountry);
 
             if (homeCountry == null || awayCountry == null)
             {
@@ -64,8 +65,9 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Match
             _logger.LogInformation($"Simulating match between {homeCountryId} and {awayCountryId}");
 
             // Get country data with players
-            var homeCountry = await _countryService.GetCountryByIdAsync(homeCountryId);
-            var awayCountry = await _countryService.GetCountryByIdAsync(awayCountryId);
+            var countries = await _countryService.GetCountriesByIdsAsync(new List<string> { homeCountryId, awayCountryId });
+            countries.TryGetValue(homeCountryId, out var homeCountry);
+            countries.TryGetValue(awayCountryId, out var awayCountry);
 
             if (homeCountry == null || awayCountry == null)
             {
@@ -91,16 +93,6 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Match
             _logger.LogInformation($"Match simulated: {homeCountry.Name} {result.HomeScore}-{result.AwayScore} {awayCountry.Name}");
 
             return result;
-        }
-
-        public Task<MatchEntity?> GetMatchByIdAsync(string matchId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<List<MatchEntity>> GetMatchesByTournamentAsync(string tournamentId)
-        {
-            throw new NotImplementedException();
         }
         //------------------------------------------------------------------------------------------------------------------------------------------//
     }
