@@ -9,6 +9,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Country
         Task<string> CreateInitialCountryAsync(string countryName, string representativeId); 
         Task<string> CreateCountryAsync(CountryEntity country);
         Task<CountryEntity?> GetCountryByIdAsync(string countryId);
+        Task<Dictionary<string, CountryEntity>> GetCountriesByIdsAsync(List<string> countryIds);
         Task<CountryEntity?> GetCountryByRepresentativeIdAsync(string representativeId);
         Task<(CountryEntity? entity, string documentId)> GetCountryWithIdByRepresentativeIdAsync(string representativeId);
         Task<double> CalculateRatingAsync(CountryEntity country);

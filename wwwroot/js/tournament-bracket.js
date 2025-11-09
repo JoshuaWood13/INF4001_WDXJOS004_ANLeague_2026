@@ -46,12 +46,8 @@ async function joinTournamentSlot(matchId, slot, button) {
         const result = await response.json();
 
         if (result.success) {
-            showToast(result.message, 'success');
-            
-            // Reload page to show updated server-side rendered data
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
+            // Reload immediately to show updated server-side rendered data
+            window.location.reload();
         } else {
             // Re-enable button on failure
             button.disabled = false;
@@ -87,11 +83,6 @@ function initializeRemoveButtons() {
 
 // Remove country from tournament
 async function removeCountryFromTournament(matchId, countryId, slot, button) {
-    // Confirm removal
-    if (!confirm('Are you sure you want to remove this country from the tournament?')) {
-        return;
-    }
-
     // Disable button during request
     button.disabled = true;
     const originalText = button.textContent;
@@ -120,12 +111,8 @@ async function removeCountryFromTournament(matchId, countryId, slot, button) {
         const result = await response.json();
 
         if (result.success) {
-            showToast(result.message, 'success');
-            
-            // Reload page to show updated server-side rendered data
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
+            // Reload immediately to show updated server-side rendered data
+            window.location.reload();
         } else {
             // Re-enable button on failure
             button.disabled = false;
@@ -163,9 +150,9 @@ function initializeAdminButtons() {
             const matchId = this.getAttribute('data-match');
 
             if (action === 'play') {
-                playMatch(matchId);
+                playMatch(matchId, this);
             } else if (action === 'simulate') {
-                simulateMatch(matchId);
+                simulateMatch(matchId, this);
             }
         });
     });
@@ -176,10 +163,6 @@ async function startTournament() {
     const startBtn = document.getElementById('startTournamentBtn');
     
     if (startBtn && startBtn.disabled) {
-        return;
-    }
-    
-    if (!confirm('Are you sure you want to start the tournament? All 8 teams must be registered before starting.')) {
         return;
     }
 
@@ -206,11 +189,8 @@ async function startTournament() {
         const result = await response.json();
 
         if (result.success) {
-            showToast(result.message, 'success');
-            // Reload the page to show the new tournament state
-            setTimeout(() => {
-                window.location.reload();
-            }, 1500);
+            // Reload immediately
+            window.location.reload();
         } else {
             showToast(result.message || 'Failed to start tournament', 'error');
             if (startBtn) {
@@ -233,10 +213,6 @@ async function restartTournament() {
     const restartBtn = document.querySelector('[data-action="restart"]');
     
     if (restartBtn && restartBtn.disabled) {
-        return;
-    }
-    
-    if (!confirm('Are you sure you want to restart the tournament? All original quarter-final teams will be re-registered automatically.')) {
         return;
     }
     
@@ -264,12 +240,8 @@ async function restartTournament() {
         const result = await response.json();
 
         if (result.success) {
-            showToast(result.message, 'success');
-            // Keep loading state while page reloads
-            // Reload the page to show the new tournament state
-            setTimeout(() => {
-                window.location.reload();
-            }, 1500);
+            // Reload immediately
+            window.location.reload();
         } else {
             showToast(result.message || 'Failed to restart tournament', 'error');
             // Re-enable button on failure
@@ -290,9 +262,21 @@ async function restartTournament() {
 }
 
 // Play match with AI commentary (admin only)
-async function playMatch(matchId) {
-    if (!confirm(`Are you sure you want to play ${matchId} with AI commentary?`)) {
+async function playMatch(matchId, button) {
+    // Check if button is already disabled
+    if (button && button.disabled) {
         return;
+    }
+
+    // Disable all play and simulate buttons
+    const allActionButtons = document.querySelectorAll('[data-action="play"], [data-action="simulate"]');
+    allActionButtons.forEach(btn => {
+        btn.disabled = true;
+    });
+
+    // Show loading state on the clicked button
+    if (button) {
+        button.textContent = 'Playing...';
     }
 
     // Create a form to submit POST request
@@ -315,9 +299,21 @@ async function playMatch(matchId) {
 }
 
 // Simulate match (admin only)
-async function simulateMatch(matchId) {
-    if (!confirm(`Are you sure you want to simulate ${matchId}?`)) {
+async function simulateMatch(matchId, button) {
+    // Check if button is already disabled
+    if (button && button.disabled) {
         return;
+    }
+
+    // Disable all play and simulate buttons
+    const allActionButtons = document.querySelectorAll('[data-action="play"], [data-action="simulate"]');
+    allActionButtons.forEach(btn => {
+        btn.disabled = true;
+    });
+
+    // Show loading state on the clicked button
+    if (button) {
+        button.textContent = 'Simulating...';
     }
 
     // Create a form to submit POST request
@@ -337,60 +333,6 @@ async function simulateMatch(matchId) {
     
     document.body.appendChild(form);
     form.submit();
-}
-
-// Toast notification helper
-function showToast(message, type = 'info') {
-    // Check if toast container exists, if not create it
-    let toastContainer = document.getElementById('toast-container');
-    if (!toastContainer) {
-        toastContainer = document.createElement('div');
-        toastContainer.id = 'toast-container';
-        toastContainer.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        `;
-        document.body.appendChild(toastContainer);
-    }
-
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-
-    const colors = {
-        success: '#28a745',
-        error: '#dc3545',
-        info: '#17a2b8',
-        warning: '#ffc107'
-    };
-
-    toast.style.cssText = `
-        background-color: ${colors[type] || colors.info};
-        color: white;
-        padding: 12px 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        min-width: 250px;
-        max-width: 400px;
-        font-size: 14px;
-        font-weight: 500;
-        animation: slideIn 0.3s ease-out;
-    `;
-
-    toast.textContent = message;
-    toastContainer.appendChild(toast);
-
-    // Auto-remove after 4 seconds
-    setTimeout(() => {
-        toast.style.animation = 'slideOut 0.3s ease-out';
-        setTimeout(() => {
-            toast.remove();
-        }, 300);
-    }, 4000);
 }
 
 // Add CSS animations

@@ -13,6 +13,9 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Firebase
         Task<List<T>> QueryCollectionAsync<T>(string collection, string field, object value) where T : class;
         Task<List<(T entity, string documentId)>> QueryCollectionWithIdsAsync<T>(string collection, string field, object value) where T : class;
         Task<List<(T entity, string documentId)>> GetCollectionWithIdsAsync<T>(string collection) where T : class;
+        Task<T?> GetMostRecentDocumentAsync<T>(string collection, string orderByField, int limit = 1) where T : class;
+        Task<(T? entity, string documentId)?> GetMostRecentDocumentWithIdAsync<T>(string collection, string orderByField, int limit = 1) where T : class;
+        Task<Dictionary<string, T>> GetDocumentsByIdsAsync<T>(string collection, List<string> documentIds) where T : class;
     }
 }
 //--------------------------------------------------------X END OF FILE X-------------------------------------------------------------------//

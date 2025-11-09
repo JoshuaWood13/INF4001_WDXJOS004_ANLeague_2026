@@ -32,11 +32,11 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Tournament
         {
             try
             {
-                // Get the latest tournament number
-                var tournaments = await _firebaseService.GetCollectionAsync<TournamentEntity>("tournaments");
+                // Get latest tournament
+                var latestTournament = await _firebaseService.GetMostRecentDocumentAsync<TournamentEntity>("tournaments", "tournamentNumber", 1);
 
-                // Determine the max tournament number
-                var maxNumber = tournaments.Any() ? tournaments.Max(t => t.TournamentNumber) : 0;
+                // Determine max tournament number
+                var maxNumber = latestTournament?.TournamentNumber ?? 0;
 
                 var tournament = new TournamentEntity
                 {
@@ -49,7 +49,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Tournament
                     Bracket = new TournamentBracket()
                 };
 
-                // Save to Firestore
+                // Save to firestore
                 await _firebaseService.AddDocumentWithIdAsync("tournaments", tournament.Id, tournament);
 
                 _logger.LogInformation($"Created new tournament with ID: {tournament.Id}");
@@ -68,32 +68,27 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Tournament
         {
             try
             {
-                var tournaments = await _firebaseService.GetCollectionAsync<TournamentEntity>("tournaments");
+                // Get the most recent tournament
+                var recentTournamentData = await _firebaseService.GetMostRecentDocumentWithIdAsync<TournamentEntity>("tournaments", "startDate", 1);
 
-                // Get the most recent tournament 
-                var recentTournament = tournaments
-                    .OrderByDescending(t => t.StartDate)
-                    .FirstOrDefault();
-
-                // Check if a recent tournament exists
-                if (recentTournament != null)
+                // Check if tournament exists
+                if (recentTournamentData.HasValue)
                 {
-                    _logger.LogInformation($"Found existing tournament with ID: {recentTournament.Id}");
-                    return recentTournament;
+                    var (tournament, documentId) = recentTournamentData.Value;
+                    if (tournament != null)
+                    {
+                        tournament.Id = documentId;
+                        _logger.LogInformation($"Found existing tournament with ID: {tournament.Id}");
+                        return tournament;
+                    }
                 }
 
-                // No tournament exists, create a fully populated one for testing
-                _logger.LogInformation("No tournament found, creating fully populated tournament for testing");
-                var newTournament = await CreateFullyPopulatedTournamentForTestingAsync();
-
-                // ORIGINAL LOGIC KEEP FOR LATER
-
-                //_logger.LogInformation($"No tournaments found, creating new one");
-                //var tournamentId = await CreateNewTournamentAsync();
-                //var newTournament = await _firebaseService.GetDocumentAsync<TournamentEntity>("tournaments", tournamentId);
-                //return newTournament!;
-
-                return newTournament;
+                // Create a new tournament if none exist
+                _logger.LogInformation($"No tournaments found, creating new one");
+                var tournamentId = await CreateNewTournamentAsync();
+                var newTournament = await _firebaseService.GetDocumentAsync<TournamentEntity>("tournaments", tournamentId);
+                
+                return newTournament!;
             }
             catch (Exception ex)
             {
@@ -107,12 +102,42 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Tournament
         {
             try
             {
-                var tournaments = await _firebaseService.GetCollectionAsync<TournamentEntity>("tournaments");
+                // Get the most recent tournament
+                var recentTournamentData = await _firebaseService.GetMostRecentDocumentWithIdAsync<TournamentEntity>("tournaments", "startDate", 1);
 
-                return tournaments
-                    .Where(t => t.Status == TournamentStatus.Registration.ToString() || t.Status == TournamentStatus.InProgress.ToString())
-                    .OrderByDescending(t => t.StartDate)
-                    .FirstOrDefault();
+                if (recentTournamentData.HasValue)
+                {
+                    var (tournament, documentId) = recentTournamentData.Value;
+                    if (tournament != null)
+                    {
+                        tournament.Id = documentId;
+                        
+                        // Check if it's in an active state
+                        if (tournament.Status == TournamentStatus.Registration.ToString() || 
+                            tournament.Status == TournamentStatus.InProgress.ToString())
+                        {
+                            return tournament;
+                        }
+                    }
+                }
+
+                // If most recent is not active, try querying for active statuses
+                var registrationTournaments = await _firebaseService.QueryCollectionAsync<TournamentEntity>("tournaments", "status", TournamentStatus.Registration.ToString());
+                if (registrationTournaments.Any())
+                {
+                    var mostRecentRegistration = registrationTournaments.OrderByDescending(t => t.StartDate).First();
+                    return mostRecentRegistration;
+                }
+
+                // Query for most recent with in progress status
+                var inProgressTournaments = await _firebaseService.QueryCollectionAsync<TournamentEntity>("tournaments", "status", TournamentStatus.InProgress.ToString());
+                if (inProgressTournaments.Any())
+                {
+                    var mostRecentInProgress = inProgressTournaments.OrderByDescending(t => t.StartDate).First();
+                    return mostRecentInProgress;
+                }
+
+                return null;
             }
             catch (Exception ex)
             {
@@ -197,16 +222,22 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Tournament
         {
             try
             {
-                // Get the current/most recent tournament
-                var tournaments = await _firebaseService.GetCollectionAsync<TournamentEntity>("tournaments");
-                var previousTournament = tournaments
-                    .OrderByDescending(t => t.StartDate)
-                    .FirstOrDefault();
+                // Get most recent tournament
+                var recentTournamentData = await _firebaseService.GetMostRecentDocumentWithIdAsync<TournamentEntity>("tournaments", "startDate", 1);
 
-                if (previousTournament == null)
+                if (!recentTournamentData.HasValue)
                 {
                     throw new InvalidOperationException("No previous tournament found to restart from");
                 }
+
+                var (tournament, documentId) = recentTournamentData.Value;
+                if (tournament == null)
+                {
+                    throw new InvalidOperationException("No previous tournament found to restart from");
+                }
+
+                tournament.Id = documentId;
+                var previousTournament = tournament;
 
                 // Validate tournament has been started before allowing restart
                 if (previousTournament.Status == TournamentStatus.Registration.ToString())
@@ -235,7 +266,8 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Tournament
                 }
 
                 // Get the latest tournament number
-                var maxNumber = tournaments.Any() ? tournaments.Max(t => t.TournamentNumber) : 0;
+                var latestTournament = await _firebaseService.GetMostRecentDocumentAsync<TournamentEntity>("tournaments", "tournamentNumber", 1);
+                var maxNumber = latestTournament?.TournamentNumber ?? 0;
 
                 // Create new tournament
                 var newTournament = new TournamentEntity
@@ -249,7 +281,6 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Tournament
                     Bracket = new TournamentBracket()
                 };
 
-                // Recreate the quarter-final matches with the original team assignments
                 var quarterFinalMatches = new[] { "QF1", "QF2", "QF3", "QF4" };
                 
                 // Get the original match assignments from the previous tournament
@@ -260,7 +291,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Tournament
 
                 if (previousQFMatches.Count == 4)
                 {
-                    // Recreate matches with the exact same team assignments
+                    // Recreate the QF matches with the original team assignments
                     foreach (var previousMatch in previousQFMatches)
                     {
                         var matchId = previousMatch.Key;
@@ -288,16 +319,30 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Tournament
                     _logger.LogWarning($"Previous tournament had {previousQFMatches.Count} QF matches, expected 4. Matches may not be properly recreated.");
                 }
 
-                // Save new tournament to Firestore
+                // Save new tournament to firstore
                 await _firebaseService.AddDocumentWithIdAsync("tournaments", newTournament.Id, newTournament);
 
                 // Re-register all original countries
+                var countriesToUpdate = await _countryService.GetCountriesByIdsAsync(originalCountries);
+                
+                // Update all countries in memory
+                var updateTasks = new List<Task>();
                 foreach (var countryId in originalCountries)
                 {
-                    await _countryService.UpdateTournamentRegistrationAsync(countryId, true);
+                    if (countriesToUpdate.TryGetValue(countryId, out var country))
+                    {
+                        country.IsRegisteredForCurrentTournament = true;
+                        updateTasks.Add(_firebaseService.UpdateDocumentAsync("countries", countryId, country));
+                    }
+                    else
+                    {
+                        _logger.LogWarning($"Country {countryId} not found when re-registering for tournament restart");
+                    }
                 }
 
-                _logger.LogInformation($"Restarted tournament with ID: {newTournament.Id}, re-registered {originalCountries.Count} countries in their original positions");
+                await Task.WhenAll(updateTasks);
+
+                _logger.LogInformation($"Restarted tournament with ID: {newTournament.Id}, re-registered {updateTasks.Count} countries in their original positions");
 
                 return newTournament;
             }
@@ -309,109 +354,117 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Tournament
         }
 
         // TESTING METHOD: Create a fully populated tournament with all existing countries (Used Claude to generate)
-        public async Task<TournamentEntity> CreateFullyPopulatedTournamentForTestingAsync()
-        {
-            try
-            {
-                _logger.LogInformation("Creating fully populated tournament for testing...");
+        //public async Task<TournamentEntity> CreateFullyPopulatedTournamentForTestingAsync()
+        //{
+        //    try
+        //    {
+        //        _logger.LogInformation("Creating fully populated tournament for testing...");
 
-                // Get all countries with their document IDs
-                var allCountries = await _firebaseService.GetCollectionWithIdsAsync<CountryEntity>("countries");
+        //        // Get all countries with their document IDs
+        //        var allCountries = await _firebaseService.GetCollectionWithIdsAsync<CountryEntity>("countries");
 
-                if (allCountries.Count != 8)
-                {
-                    _logger.LogWarning($"Expected 8 countries, found {allCountries.Count}. Proceeding anyway...");
-                }
+        //        if (allCountries.Count != 8)
+        //        {
+        //            _logger.LogWarning($"Expected 8 countries, found {allCountries.Count}. Proceeding anyway...");
+        //        }
 
-                // Reset all countries' registration status to false
-                foreach (var (country, countryId) in allCountries)
-                {
-                    country.IsRegisteredForCurrentTournament = false;
-                    await _firebaseService.UpdateDocumentAsync("countries", countryId, country);
-                }
+        //        // Reset all countries' registration status to false (parallel updates)
+        //        var resetTasks = new List<Task>();
+        //        foreach (var (country, countryId) in allCountries)
+        //        {
+        //            country.IsRegisteredForCurrentTournament = false;
+        //            resetTasks.Add(_firebaseService.UpdateDocumentAsync("countries", countryId, country));
+        //        }
+        //        await Task.WhenAll(resetTasks);
 
-                _logger.LogInformation($"Reset registration status for {allCountries.Count} countries");
+        //        _logger.LogInformation($"Reset registration status for {allCountries.Count} countries");
 
-                // Create a new tournament
-                var tournamentId = await CreateNewTournamentAsync();
-                var tournament = await _firebaseService.GetDocumentAsync<TournamentEntity>("tournaments", tournamentId);
+        //        // Create a new tournament
+        //        var tournamentId = await CreateNewTournamentAsync();
+        //        var tournament = await _firebaseService.GetDocumentAsync<TournamentEntity>("tournaments", tournamentId);
 
-                if (tournament == null)
-                {
-                    throw new Exception("Failed to create tournament");
-                }
+        //        if (tournament == null)
+        //        {
+        //            throw new Exception("Failed to create tournament");
+        //        }
 
-                // Add all countries to the tournament (2 per quarter-final match)
-                var quarterFinalMatches = new[] { "QF1", "QF2", "QF3", "QF4" };
-                var slots = new[] { "home", "away" };
+        //        // Add all countries to the tournament (2 per quarter-final match)
+        //        var quarterFinalMatches = new[] { "QF1", "QF2", "QF3", "QF4" };
+        //        var slots = new[] { "home", "away" };
                 
-                int countryIndex = 0;
-                foreach (var matchId in quarterFinalMatches)
-                {
-                    foreach (var slot in slots)
-                    {
-                        if (countryIndex < allCountries.Count)
-                        {
-                            var (country, countryId) = allCountries[countryIndex];
+        //        int countryIndex = 0;
+        //        foreach (var matchId in quarterFinalMatches)
+        //        {
+        //            foreach (var slot in slots)
+        //            {
+        //                if (countryIndex < allCountries.Count)
+        //                {
+        //                    var (country, countryId) = allCountries[countryIndex];
                             
-                            // Create or update match in tournament
-                            if (!tournament.Matches.ContainsKey(matchId))
-                            {
-                                tournament.Matches[matchId] = new MatchEntity
-                                {
-                                    Id = matchId,
-                                    TournamentId = tournament.Id,
-                                    Round = GetRoundFromMatchId(matchId),
-                                    Status = MatchStatus.Scheduled.ToString(),
-                                    MatchDate = DateTime.UtcNow,
-                                    HomeCountryId = string.Empty,
-                                    AwayCountryId = string.Empty
-                                };
-                            }
+        //                    // Create or update match in tournament
+        //                    if (!tournament.Matches.ContainsKey(matchId))
+        //                    {
+        //                        tournament.Matches[matchId] = new MatchEntity
+        //                        {
+        //                            Id = matchId,
+        //                            TournamentId = tournament.Id,
+        //                            Round = GetRoundFromMatchId(matchId),
+        //                            Status = MatchStatus.Scheduled.ToString(),
+        //                            MatchDate = DateTime.UtcNow,
+        //                            HomeCountryId = string.Empty,
+        //                            AwayCountryId = string.Empty
+        //                        };
+        //                    }
 
-                            // Assign country to slot
-                            if (slot == "home")
-                            {
-                                tournament.Matches[matchId].HomeCountryId = countryId;
-                            }
-                            else
-                            {
-                                tournament.Matches[matchId].AwayCountryId = countryId;
-                            }
+        //                    // Assign country to slot
+        //                    if (slot == "home")
+        //                    {
+        //                        tournament.Matches[matchId].HomeCountryId = countryId;
+        //                    }
+        //                    else
+        //                    {
+        //                        tournament.Matches[matchId].AwayCountryId = countryId;
+        //                    }
 
-                            // Add to registered countries
-                            if (!tournament.RegisteredCountries.Contains(countryId))
-                            {
-                                tournament.RegisteredCountries.Add(countryId);
-                            }
+        //                    // Add to registered countries
+        //                    if (!tournament.RegisteredCountries.Contains(countryId))
+        //                    {
+        //                        tournament.RegisteredCountries.Add(countryId);
+        //                    }
 
-                            // Update bracket
-                            UpdateBracketWithMatch(tournament.Bracket, matchId);
+        //                    // Update bracket
+        //                    UpdateBracketWithMatch(tournament.Bracket, matchId);
 
-                            // Update country registration status
-                            country.IsRegisteredForCurrentTournament = true;
-                            await _firebaseService.UpdateDocumentAsync("countries", countryId, country);
+        //                    // Update country registration status in memory (batch update later)
+        //                    country.IsRegisteredForCurrentTournament = true;
 
-                            _logger.LogInformation($"Added {country.Name} to {matchId} ({slot} slot)");
+        //                    _logger.LogInformation($"Added {country.Name} to {matchId} ({slot} slot)");
 
-                            countryIndex++;
-                        }
-                    }
-                }
+        //                    countryIndex++;
+        //                }
+        //            }
+        //        }
 
-                // Save the fully populated tournament
-                await _firebaseService.UpdateDocumentAsync("tournaments", tournament.Id, tournament);
+        //        // Batch update all country registration statuses in parallel
+        //        var registrationUpdateTasks = allCountries
+        //            .Take(countryIndex)
+        //            .Select(c => _firebaseService.UpdateDocumentAsync("countries", c.documentId, c.entity))
+        //            .ToList();
+        //        await Task.WhenAll(registrationUpdateTasks);
 
-                _logger.LogInformation($"Successfully created fully populated tournament with {tournament.RegisteredCountries.Count} countries");
+        //        // Save the fully populated tournament
+        //        await _firebaseService.UpdateDocumentAsync("tournaments", tournament.Id, tournament);
 
-                return tournament;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating fully populated tournament for testing");
-                throw;
-            }
-        }
+        //        _logger.LogInformation($"Successfully created fully populated tournament with {tournament.RegisteredCountries.Count} countries");
+
+        //        return tournament;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Error creating fully populated tournament for testing");
+        //        throw;
+        //    }
+        //}
 
         // Join an open match slot in the current tournament and update the tournament, match, and country data.
         public async Task<JoinTournamentResult> JoinTournamentSlotAsync(string matchId, string countryId, string slot)

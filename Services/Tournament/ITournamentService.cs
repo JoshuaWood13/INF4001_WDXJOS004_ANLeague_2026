@@ -12,7 +12,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Tournament
         Task<TournamentEntity> RestartTournamentAsync();
         Task<JoinTournamentResult> JoinTournamentSlotAsync(string matchId, string countryId, string slot);
         Task<RemoveCountryResult> RemoveCountryFromTournamentAsync(string matchId, string countryId, string slot);
-        Task<TournamentEntity> CreateFullyPopulatedTournamentForTestingAsync();
+        //Task<TournamentEntity> CreateFullyPopulatedTournamentForTestingAsync();
         Task ProgressWinnerToNextRoundAsync(string tournamentId, string completedMatchId, string winnerId);
     }
 

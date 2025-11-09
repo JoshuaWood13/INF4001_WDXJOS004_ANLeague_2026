@@ -24,7 +24,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
         //------------------------------------------------------------------------------------------------------------------------------------------//
         public TournamentController(ILogger<TournamentController> logger, ICountryService countryService, IFirebaseService firebaseService, ITournamentService tournamentService, IMatchService matchService, IAICommentaryService aiCommentaryService)
         {
-            _logger = logger;
+            _logger = logger; 
             _countryService = countryService;
             _firebaseService = firebaseService;
             _tournamentService = tournamentService;
@@ -53,20 +53,38 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
                 string? userCountryName = null;
                 bool isUserTeamRegistered = false;
 
-                // Get representatives country info
+                // Extract all unique country IDs from matches
+                var countryIds = tournament.Matches.Values
+                    .SelectMany(m => new[] { m.HomeCountryId, m.AwayCountryId })
+                    .Where(id => !string.IsNullOrEmpty(id))
+                    .Distinct()
+                    .ToList();
+
+                // Load countries
+                Task<Dictionary<string, Country>> countriesTask = _countryService.GetCountriesByIdsAsync(countryIds);
+                Task<(Country? entity, string documentId)> userCountryTask = Task.FromResult<(Country?, string)>((null, string.Empty));
+
                 if (isRepresentative)
                 {
                     var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                     if (!string.IsNullOrEmpty(userId))
                     {
-                        var (country, countryId) = await _countryService.GetCountryWithIdByRepresentativeIdAsync(userId);
-                        if (country != null)
-                        {
-                            userCountryId = countryId;
-                            userCountryName = country.Name;
-                            isUserTeamRegistered = country.IsRegisteredForCurrentTournament;
-                        }
+                        userCountryTask = _countryService.GetCountryWithIdByRepresentativeIdAsync(userId);
                     }
+                }
+
+                // Wait for operations to complete
+                await Task.WhenAll(countriesTask, userCountryTask);
+
+                var countryLookup = await countriesTask;
+                var (userCountry, userCountryDocId) = await userCountryTask;
+
+                // Set user country info
+                if (isRepresentative && userCountry != null)
+                {
+                    userCountryId = userCountryDocId;
+                    userCountryName = userCountry.Name;
+                    isUserTeamRegistered = userCountry.IsRegisteredForCurrentTournament;
                 }
 
                 // Tournament state checks
@@ -76,7 +94,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
                 bool showRemoveButtons = isAdmin && tournament.Status == "Registration";
 
                 // Build match view models
-                var matchViewModels = await BuildMatchViewModels(tournament.Matches.Values.ToList(), isTournamentStarted);
+                var matchViewModels = BuildMatchViewModels(tournament.Matches.Values.ToList(), countryLookup, isTournamentStarted);
                 
                 // Get match or create empty one
                 MatchViewModel GetOrCreateMatch(string matchId)
@@ -132,6 +150,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
             }
         }
 
+        // Trigger match commentary generation, updated firebase data and return data to be displayed in view
         [HttpGet]
         public async Task<IActionResult> MatchDetails(string matchId, string mode)
         {
@@ -194,14 +213,14 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
 
                 _logger.LogInformation($"Match {matchId} completed: {matchResult.HomeCountryName} {matchResult.HomeScore}-{matchResult.AwayScore} {matchResult.AwayCountryName}");
 
-                // Update Firebase in background
+                // Update firebase in background
                 _ = Task.Run(async () =>
                 {
                     try
                     {
-                        // Get country data for player goal updates
-                        var homeCountry = await _countryService.GetCountryByIdAsync(match.HomeCountryId);
-                        var awayCountry = await _countryService.GetCountryByIdAsync(match.AwayCountryId);
+                        var countries = await _countryService.GetCountriesByIdsAsync(new List<string> { match.HomeCountryId, match.AwayCountryId });
+                        countries.TryGetValue(match.HomeCountryId, out var homeCountry);
+                        countries.TryGetValue(match.AwayCountryId, out var awayCountry);
 
                         if (homeCountry != null && awayCountry != null)
                         {
@@ -224,7 +243,6 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
                                 await _countryService.UpdatePlayerGoalsAsync(match.AwayCountryId, awayPlayerGoals);
                             }
 
-                            // Update team statistics for both teams
                             bool homeWon = matchResult.WinnerId == match.HomeCountryId;
                             bool awayWon = matchResult.WinnerId == match.AwayCountryId;
                             bool isFinalMatch = matchId == "Final";
@@ -233,7 +251,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
                             await _countryService.UpdateTeamStatisticsAsync(
                                 match.HomeCountryId,
                                 won: homeWon,
-                                drew: false, // no draws
+                                drew: false, 
                                 tournamentWon: isFinalMatch && homeWon
                             );
 
@@ -241,7 +259,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
                             await _countryService.UpdateTeamStatisticsAsync(
                                 match.AwayCountryId,
                                 won: awayWon,
-                                drew: false, // no draws
+                                drew: false, 
                                 tournamentWon: isFinalMatch && awayWon
                             );
                         }
@@ -281,7 +299,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
         }
 
         // Helper method to build match view models
-        private async Task<List<MatchViewModel>> BuildMatchViewModels(List<Models.Entities.Match> matches, bool isTournamentStarted)
+        private List<MatchViewModel> BuildMatchViewModels(List<Match> matches, Dictionary<string, Country> countryLookup, bool isTournamentStarted)
         {
             var matchViewModels = new List<MatchViewModel>();
 
@@ -299,33 +317,25 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
                 };
 
                 // Get home country info
-                if (!string.IsNullOrEmpty(match.HomeCountryId))
+                if (!string.IsNullOrEmpty(match.HomeCountryId) && countryLookup.TryGetValue(match.HomeCountryId, out var homeCountry))
                 {
-                    var homeCountry = await _countryService.GetCountryByIdAsync(match.HomeCountryId);
-                    if (homeCountry != null)
+                    matchViewModel.HomeCountry = new CountrySlotInfo
                     {
-                        matchViewModel.HomeCountry = new CountrySlotInfo
-                        {
-                            Id = match.HomeCountryId,
-                            Name = homeCountry.Name,
-                            ManagerName = homeCountry.ManagerName
-                        };
-                    }
+                        Id = match.HomeCountryId,
+                        Name = homeCountry.Name,
+                        ManagerName = homeCountry.ManagerName
+                    };
                 }
 
                 // Get away country info
-                if (!string.IsNullOrEmpty(match.AwayCountryId))
+                if (!string.IsNullOrEmpty(match.AwayCountryId) && countryLookup.TryGetValue(match.AwayCountryId, out var awayCountry))
                 {
-                    var awayCountry = await _countryService.GetCountryByIdAsync(match.AwayCountryId);
-                    if (awayCountry != null)
+                    matchViewModel.AwayCountry = new CountrySlotInfo
                     {
-                        matchViewModel.AwayCountry = new CountrySlotInfo
-                        {
-                            Id = match.AwayCountryId,
-                            Name = awayCountry.Name,
-                            ManagerName = awayCountry.ManagerName
-                        };
-                    }
+                        Id = match.AwayCountryId,
+                        Name = awayCountry.Name,
+                        ManagerName = awayCountry.ManagerName
+                    };
                 }
 
                 // Calculate if match can be played
@@ -577,16 +587,10 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
                     return Json(new { success = true, countryNames = new Dictionary<string, string>() });
                 }
 
-                var countryNames = new Dictionary<string, string>();
+                var countries = await _countryService.GetCountriesByIdsAsync(request.CountryIds);
 
-                foreach (var countryId in request.CountryIds)
-                {
-                    var country = await _countryService.GetCountryByIdAsync(countryId);
-                    if (country != null)
-                    {
-                        countryNames[countryId] = country.Name;
-                    }
-                }
+                var countryNames = countries
+                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Name);
 
                 return Json(new { success = true, countryNames });
             }

@@ -107,6 +107,29 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Country
             }
         }
 
+        // Get multiple countries by their IDs
+        public async Task<Dictionary<string, CountryEntity>> GetCountriesByIdsAsync(List<string> countryIds)
+        {
+            try
+            {
+                if (countryIds == null || !countryIds.Any())
+                {
+                    return new Dictionary<string, CountryEntity>();
+                }
+
+                var countryDict = await _firebaseService.GetDocumentsByIdsAsync<CountryEntity>("countries", countryIds);
+
+                _logger.LogInformation($"Retrieved {countryDict.Count} countries out of {countryIds.Count} requested");
+
+                return countryDict;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error getting countries by IDs");
+                return new Dictionary<string, CountryEntity>();
+            }
+        }
+
         // Get country by representative ID
         public async Task<CountryEntity?> GetCountryByRepresentativeIdAsync(string representativeId)
         {
