@@ -1,11 +1,10 @@
-using INF4001_WDXJOS004_ANLeague_2026.Models.Entities;
-using INF4001_WDXJOS004_ANLeague_2026.Models.Enums;
 
 namespace INF4001_WDXJOS004_ANLeague_2026.Models.ViewModels
 {
     public class MatchHighlightsViewModel
     {
         public List<TournamentMatchesViewModel> Tournaments { get; set; } = new List<TournamentMatchesViewModel>();
+        public int? SelectedTournamentNumber { get; set; }
     }
 
     public class TournamentMatchesViewModel

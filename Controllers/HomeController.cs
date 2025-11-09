@@ -33,7 +33,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
 
         // Get tournamnet and match data to display
         [HttpGet]
-        public async Task<IActionResult> MatchHighlights()
+        public async Task<IActionResult> MatchHighlights(int? tournamentNumber = null)
         {
             try
             {
@@ -52,7 +52,10 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
                 // Sort tournaments
                 var sortedTournaments = tournaments.OrderByDescending(t => t.TournamentNumber).ToList();
 
-                var viewModel = new MatchHighlightsViewModel();
+                var viewModel = new MatchHighlightsViewModel
+                {
+                    SelectedTournamentNumber = tournamentNumber
+                };
 
                 // Build view model
                 foreach (var tournament in sortedTournaments)
@@ -162,6 +165,9 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
                     GoalScorers = match.GoalScorers ?? new List<Models.Entities.Goal>(),
                     Commentary = match.Commentary ?? new List<Models.Entities.CommentaryMoment>()
                 };
+
+                // Pass tournament number to view for back link
+                ViewBag.TournamentNumber = tournament.TournamentNumber;
 
                 return View(viewModel);
             }

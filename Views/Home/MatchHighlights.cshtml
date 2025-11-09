@@ -1,7 +1,16 @@
 @model INF4001_WDXJOS004_ANLeague_2026.Models.ViewModels.MatchHighlightsViewModel
 
 @{
-    var firstTournament = Model.Tournaments.FirstOrDefault();
+    // Determine which tournament to show initially
+    var selectedTournament = Model.Tournaments.FirstOrDefault();
+    if (Model.SelectedTournamentNumber.HasValue)
+    {
+        var tournamentByNumber = Model.Tournaments.FirstOrDefault(t => t.TournamentNumber == Model.SelectedTournamentNumber.Value);
+        if (tournamentByNumber != null)
+        {
+            selectedTournament = tournamentByNumber;
+        }
+    }
     
     // Format match titles
     string GetMatchTitle(string matchId, string round)
@@ -33,7 +42,6 @@
     @if (!Model.Tournaments.Any())
     {
         <div class="alert alert-info text-center" role="alert">
-            <i class="bi bi-info-circle-fill"></i>
             <p class="mb-0 mt-2">No completed matches found. Matches will appear here once they are played.</p>
         </div>
     }
@@ -42,11 +50,11 @@
         <!-- Tournament Header and Selector -->
         <div class="alert alert-info mb-4">
             <div class="d-flex justify-content-between align-items-center">
-                <h3 class="mb-0" id="currentTournamentTitle">Tournament @firstTournament.TournamentNumber</h3>
+                <h3 class="mb-0" id="currentTournamentTitle">Tournament @selectedTournament.TournamentNumber</h3>
                 <select id="tournamentSelector" class="form-select form-select-lg" style="max-width: 500px;">
                     @foreach (var t in Model.Tournaments)
                     {
-                        var isSelected = t == firstTournament ? "selected" : null;
+                        var isSelected = t == selectedTournament ? "selected" : null;
                         var statusLabel = t.Status == "InProgress"
                         ? " - Current"
                         : $" - {t.Status} ({t.StartDate:MMM dd, yyyy})";
@@ -67,7 +75,7 @@
         {
             <div class="tournament-section" 
                  id="tournament-@tournament.TournamentNumber" 
-                 style="@(tournament != firstTournament ? "display: none;" : "")">
+                 style="@(tournament != selectedTournament ? "display: none;" : "")">
 
                 <div class="row g-4">
                     @foreach (var match in tournament.Matches)
@@ -153,6 +161,11 @@
             var selectedOption = this.options[this.selectedIndex];
             var tournamentNumber = selectedOption.getAttribute('data-tournament-number');
             document.getElementById('currentTournamentTitle').textContent = 'Tournament ' + tournamentNumber;
+            
+            // Update URL with tournament number parameter
+            var url = new URL(window.location);
+            url.searchParams.set('tournamentNumber', tournamentNumber);
+            window.history.replaceState({}, '', url);
         });
     </script>
 }

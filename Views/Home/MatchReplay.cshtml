@@ -3,18 +3,14 @@
 <link rel="stylesheet" href="~/css/match-details.css" asp-append-version="true" />
 
 <div class="container mt-4">
-     
-    <!-- Back Button -->
-    <div class="mb-3">
-        <a href="@Url.Action("MatchHighlights", "Home")" class="btn btn-dark">
-            <i class="bi bi-arrow-left"></i> Back to Match Highlights
-        </a>
-    </div>
 
     <!-- Match Header -->
     <div class="card shadow mb-4">
-        <div class="card-header text-center bg-success text-white">
-            <h3 class="mb-0">@Model.Match.Round</h3>
+        <div class="card-header bg-success text-white position-relative">
+            <a href="@Url.Action("MatchHighlights", "Home", new { tournamentNumber = ViewBag.TournamentNumber })" class="btn btn-outline-dark btn-sm position-absolute" style="left: 15px; top: 50%; transform: translateY(-50%);">
+                Back
+            </a>
+            <h3 class="mb-0 text-center">@Model.Match.Round</h3>
         </div>
         <div class="card-body">
             <div class="match-header-content">
@@ -49,7 +45,7 @@
         <div class="card-body">
             @if (Model.Commentary != null && Model.Commentary.Any())
             {
-                <div class="events-list">
+                <div id="replayEventsList" class="events-list replay-events-list">
                     @foreach (var moment in Model.Commentary.OrderBy(c => c.Minute))
                     {
                         <div class="event-item @moment.Type.ToString().ToLower()">

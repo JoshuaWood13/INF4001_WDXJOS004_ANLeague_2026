@@ -79,26 +79,44 @@
     padding-bottom: 8px;
 }
 
+/* Replay view events list for 5 events at a time*/
+.replay-events-list,
+#replayEventsList {
+    max-height: 425px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 10px;
+    padding-bottom: 8px; 
+}
+
 /* Custom scrollbar styling */
-#eventsList::-webkit-scrollbar {
+#eventsList::-webkit-scrollbar,
+.replay-events-list::-webkit-scrollbar,
+#replayEventsList::-webkit-scrollbar {
     width: 8px;
 }
 
-#eventsList::-webkit-scrollbar-track {
+#eventsList::-webkit-scrollbar-track,
+.replay-events-list::-webkit-scrollbar-track,
+#replayEventsList::-webkit-scrollbar-track {
     background: #f1f1f1;
     border-radius: 4px;
 }
 
-#eventsList::-webkit-scrollbar-thumb {
+#eventsList::-webkit-scrollbar-thumb,
+.replay-events-list::-webkit-scrollbar-thumb,
+#replayEventsList::-webkit-scrollbar-thumb {
     background: #888;
     border-radius: 4px;
 }
 
-#eventsList::-webkit-scrollbar-thumb:hover {
+#eventsList::-webkit-scrollbar-thumb:hover,
+.replay-events-list::-webkit-scrollbar-thumb:hover,
+#replayEventsList::-webkit-scrollbar-thumb:hover {
     background: #555;
 }
 
-/* Event items - reduced sizing for 4 events to fit */
+/* Event items for 4 events at a time */
 .event-item {
     padding: 10px 14px;
     border-left: 4px solid #ddd;
