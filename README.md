@@ -140,3 +140,84 @@ Before running the application, you need to configure the `appsettings.Developme
      ```
    - The application will start and display the URL (typically `https://localhost:7241`)
    - Open the URL in your browser
+
+## Project Structure
+
+```
+INF4001_WDXJOS004_ANLeague_2026/
+│
+├── Controllers/
+│   ├── AccountController.cs
+│   ├── AdminController.cs
+│   ├── HomeController.cs
+│   ├── RepresentativeController.cs
+│   └── TournamentController.cs
+│
+├── Models/
+│   ├── Entities/
+│   ├── Enums/
+│   └── ViewModels/
+│
+├── Views/
+│   ├── Account/
+│   │   ├── Login.cshtml
+│   │   └── SignUp.cshtml
+│   ├── Home/
+│   │   ├── Index.cshtml
+│   │   ├── Leaderboard.cshtml
+│   │   ├── MatchHighlights.cshtml
+│   │   └── MatchReplay.cshtml
+│   ├── Representative/
+│   │   ├── CreateTeam.cshtml
+│   │   └── MyTeam.cshtml
+│   ├── Shared/
+│   │   ├── _Layout.cshtml
+│   │   ├── _ValidationScriptsPartial.cshtml
+│   │   └── Error.cshtml
+│   └── Tournament/
+│       ├── MatchDetails.cshtml
+│       └── Tournament.cshtml
+│
+├── Services/
+│   ├── AICommentary/
+│   │   ├── AICommentaryService.cs
+│   │   └── IAICommentaryService.cs
+│   ├── Auth/
+│   │   ├── AuthService.cs
+│   │   └── IAuthService.cs
+│   ├── Country/
+│   │   ├── CountryService.cs
+│   │   └── ICountryService.cs
+│   ├── Email/
+│   │   ├── EmailService.cs
+│   │   └── IEmailService.cs
+│   ├── Firebase/
+│   │   ├── FirebaseService.cs
+│   │   └── IFirebaseService.cs
+│   ├── Match/
+│   │   ├── IMatchService.cs
+│   │   └── MatchService.cs
+│   ├── PlayerGenerator/
+│   │   ├── IPlayerGeneratorService.cs
+│   │   └── PlayerGeneratorService.cs
+│   └── Tournament/
+│       ├── ITournamentService.cs
+│       └── TournamentService.cs
+│
+├── Data/
+│   ├── AiPrompts.cs
+│   ├── CountryList.cs
+│   └── PlayerNames.cs
+│
+├── Middleware/
+│
+├── wwwroot/
+│   ├── css/
+│   ├── js/
+│   ├── lib/
+│   └── images/
+│
+├── Program.cs
+├── appsettings.json
+└── INF4001_WDXJOS004_ANLeague_2026.csproj
+```
