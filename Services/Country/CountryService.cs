@@ -155,20 +155,39 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Country
                 }
 
                 double totalRating = 0;
-                int ratingCount = 0;
+                int playerCount = 0;
 
                 foreach (var player in country.Players)
                 {
-                    totalRating += player.Ratings.GK;
-                    totalRating += player.Ratings.DF;
-                    totalRating += player.Ratings.MD;
-                    totalRating += player.Ratings.AT;
-                    ratingCount += 4; 
+                    // Only use the rating for the player's natural position
+                    int positionRating = 0;
+                    switch (player.NaturalPosition?.ToUpper())
+                    {
+                        case "GK":
+                            positionRating = player.Ratings.GK;
+                            break;
+                        case "DF":
+                            positionRating = player.Ratings.DF;
+                            break;
+                        case "MD":
+                            positionRating = player.Ratings.MD;
+                            break;
+                        case "AT":
+                            positionRating = player.Ratings.AT;
+                            break;
+                        default:
+                            continue;
+                    }
+
+                    totalRating += positionRating;
+                    playerCount++;
                 }
 
-                double averageRating = ratingCount > 0 ? totalRating / ratingCount : 0.0;
+                double averageRating = playerCount > 0 ? totalRating / playerCount : 0.0;
+                
+                double roundedRating = Math.Round(averageRating, MidpointRounding.AwayFromZero);
 
-                return Task.FromResult(averageRating);
+                return Task.FromResult(roundedRating);
             }
             catch (Exception ex)
             {

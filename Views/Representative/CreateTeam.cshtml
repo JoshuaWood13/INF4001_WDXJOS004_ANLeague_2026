@@ -64,7 +64,8 @@
                                             <td>
                                                 <input type="hidden" name="Players[@i].Id" value="@Model.Players[i].Id" />
                                                 <input type="hidden" name="Players[@i].NaturalPosition" value="@Model.Players[i].NaturalPosition" />
-                                                <input type="text" name="Players[@i].Name" value="@Model.Players[i].Name" class="form-control" required />
+                                                <input type="text" name="Players[@i].Name" value="@Model.Players[i].Name" class="form-control player-name-input" required />
+                                                <div class="text-danger player-name-error" style="display: none; font-size: 0.875em; margin-top: 0.25rem;">Player name is required</div>
                                             </td>
                                             <td>
                                                 <select class="form-select natural-pos-select" data-name-prefix="Players[@i]" required>
@@ -114,11 +115,6 @@
                             </tbody>
                         </table>
                     </div>
-                </div>
-
-                <!-- Captain Selection Error -->
-                <div class="mb-3">
-                    <span asp-validation-for="CaptainId" class="text-danger"></span>
                 </div>
 
                 <!-- Form Actions -->

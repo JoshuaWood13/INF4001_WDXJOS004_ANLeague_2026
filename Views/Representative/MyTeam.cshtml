@@ -10,22 +10,25 @@
     <!-- Success/Error Messages -->
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            @TempData["SuccessMessage"]
+        <div class="alert alert-success alert-dismissible fade show error-message position-fixed"
+             style="top: 80px; right: 20px; z-index: 1100; max-width: 400px;" id="successMessage">
+            <strong>Success!</strong> @TempData["SuccessMessage"]
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
     @if (TempData["ErrorMessage"] != null)
     {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            @TempData["ErrorMessage"]
+        <div class="alert alert-danger alert-dismissible fade show error-message position-fixed"
+             style="top: 80px; right: 20px; z-index: 1100; max-width: 400px;" id="errorMessage">
+            <strong>Error!</strong> @TempData["ErrorMessage"]
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
     @if (TempData["InfoMessage"] != null)
     {
-        <div class="alert alert-info alert-dismissible fade show" role="alert">
-            @TempData["InfoMessage"]
+        <div class="alert alert-info alert-dismissible fade show error-message position-fixed"
+             style="top: 80px; right: 20px; z-index: 1100; max-width: 400px;" id="infoMessage">
+            <strong>Info!</strong> @TempData["InfoMessage"]
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
@@ -40,7 +43,7 @@
             <div class="card-body text-center">
                 <p class="lead">Your team has not been created yet.</p>
                 <p>Create your team with 23 players, select a manager, and choose a captain.</p>
-                <a asp-action="CreateTeam" class="btn btn-primary btn-lg">Create Team</a>
+                <a asp-action="CreateTeam" class="btn btn-success btn-lg">Create Team</a>
             </div>
         </div>
     }
@@ -64,7 +67,7 @@
                             <div class="fs-5">@Model.CaptainName</div>
                             <hr />
                             <div class="mb-2"><strong>Rating</strong></div>
-                            <div class="fs-4 fw-bold">@Model.Country.Rating.ToString("F2")</div>
+                            <div class="fs-4 fw-bold">@Model.Country.Rating.ToString("F0")</div>
                         </div>
                     </div>
 
@@ -124,11 +127,11 @@
                         <thead>
                             <tr>
                                 <th>Name</th>
-                                <th>Natural Position</th>
-                                <th>GK Rating</th>
-                                <th>DF Rating</th>
-                                <th>MD Rating</th>
-                                <th>AT Rating</th>
+                                <th class="text-center">Natural Position</th>
+                                <th class="text-center">GK Rating</th>
+                                <th class="text-center">DF Rating</th>
+                                <th class="text-center">MD Rating</th>
+                                <th class="text-center">AT Rating</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -147,11 +150,11 @@
                                                 @player.Name
                                             }
                                         </td>
-                                        <td>@player.NaturalPosition</td>
-                                        <td>@player.Ratings.GK</td>
-                                        <td>@player.Ratings.DF</td>
-                                        <td>@player.Ratings.MD</td>
-                                        <td>@player.Ratings.AT</td>
+                                        <td class="text-center">@player.NaturalPosition</td>
+                                        <td class="text-center">@player.Ratings.GK</td>
+                                        <td class="text-center">@player.Ratings.DF</td>
+                                        <td class="text-center">@player.Ratings.MD</td>
+                                        <td class="text-center">@player.Ratings.AT</td>
                                     </tr>
                                 }
                             }
@@ -168,3 +171,38 @@
         </div>
     }
 </div>
+
+@section Scripts {
+    <script>
+        // Hide temp data messages after 3 seconds
+        $(document).ready(function () {
+            var $successMessage = $('#successMessage');
+            var $errorMessage = $('#errorMessage');
+            var $infoMessage = $('#infoMessage');
+
+            if ($successMessage.length) {
+                setTimeout(function () {
+                    $successMessage.fadeOut(500, function () {
+                        $(this).remove();
+                    });
+                }, 3000);
+            }
+
+            if ($errorMessage.length) {
+                setTimeout(function () {
+                    $errorMessage.fadeOut(500, function () {
+                        $(this).remove();
+                    });
+                }, 3000);
+            }
+
+            if ($infoMessage.length) {
+                setTimeout(function () {
+                    $infoMessage.fadeOut(500, function () {
+                        $(this).remove();
+                    });
+                }, 3000);
+            }
+        });
+    </script>
+}

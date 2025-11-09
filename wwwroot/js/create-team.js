@@ -1,4 +1,4 @@
-// Handles player creation management and validation
+// Handles player creation management and validation (used Claude to help me write this file)
 
 $(document).ready(function () {
     const REQUIRED_POSITIONS = { GK: 2, DF: 8, MD: 8, AT: 5 };
@@ -55,7 +55,8 @@ $(document).ready(function () {
                 <td>
                     <input type="hidden" name="Players[${index}].Id" value="${id}" />
                     <input type="hidden" class="natpos-hidden" name="Players[${index}].NaturalPosition" value="${pos}" />
-                    <input type="text" name="Players[${index}].Name" value="${name}" class="form-control" required />
+                    <input type="text" name="Players[${index}].Name" value="${name}" class="form-control player-name-input" required />
+                    <div class="text-danger player-name-error" style="display: none; font-size: 0.875em; margin-top: 0.25rem;">Player name is required</div>
                 </td>
                 <td>
                     <select class="form-select natural-pos-select" data-name-prefix="Players[${index}]" required>
@@ -101,10 +102,17 @@ $(document).ready(function () {
         const existing = [];
         $tbody.find('tr[data-player-index]').each(function() {
             const $tr = $(this);
-            const id = $tr.find('input[name$=".Id"]').val();
-            const name = $tr.find('input[name$=".Name"]').val();
-            const pos = $tr.find('.natural-pos-select').val();
-            if (id && name && pos) existing.push({ id, name, naturalPosition: pos });
+            let id = $tr.find('input[name$=".Id"]').val();
+            const name = $tr.find('input[name$=".Name"]').val() || '';
+            const pos = $tr.find('.natural-pos-select').val() || $tr.find('.natpos-hidden').val() || 'DF';
+            if (pos) {
+                if (!id) {
+                    id = crypto.randomUUID();
+                    $tr.find('input[name$=".Id"]').val(id);
+                    $tr.find('.captain-radio').val(id);
+                }
+                existing.push({ id, name, naturalPosition: pos });
+            }
         });
 
         $.ajax({
@@ -155,6 +163,11 @@ $(document).ready(function () {
         });
     });
 
+    // Hide player name errors when user types
+    $(document).on('input', '.player-name-input', function() {
+        $(this).siblings('.player-name-error').hide();
+    });
+
     // Form validation
     $('#createTeamForm').submit(function(e) {
         const count = getPlayerCount();
@@ -172,10 +185,28 @@ $(document).ready(function () {
             return false;
         }
 
+        // Validate player names 
+        if (count === MAX_PLAYERS) {
+            let hasEmptyName = false;
+            $tbody.find('tr[data-player-index]').each(function() {
+                const $nameInput = $(this).find('.player-name-input');
+                const name = $nameInput.val()?.trim();
+                if (!name) {
+                    hasEmptyName = true;
+                    $nameInput.siblings('.player-name-error').show();
+                }
+            });
+
+            if (hasEmptyName) {
+                e.preventDefault();
+                return false;
+            }
+        }
+
         // Validate captain selection
         if (!$('input[name="CaptainId"]:checked').length) {
             e.preventDefault();
-            alert('Please select a captain.');
+            showError('Please select a captain.');
             return false;
         }
 
