@@ -351,6 +351,73 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Country
             }
         }
 
+        // Update both player goals and team statistics
+        public async Task UpdateMatchResultsAsync(string countryId, Dictionary<string, int> playerGoalCounts, bool won, bool drew, bool tournamentWon)
+        {
+            try
+            {
+                var country = await GetCountryByIdAsync(countryId);
+
+                if (country == null)
+                {
+                    _logger.LogWarning($"Country with ID {countryId} not found when updating match results");
+                    return;
+                }
+
+                // Update player goals
+                if (country.Players != null && country.Players.Any() && playerGoalCounts != null && playerGoalCounts.Any())
+                {
+                    int updatedCount = 0;
+                    foreach (var playerGoal in playerGoalCounts)
+                    {
+                        var player = country.Players.FirstOrDefault(p => p.Id == playerGoal.Key);
+                        if (player != null)
+                        {
+                            player.goalsScored += playerGoal.Value;
+                            updatedCount++;
+                            _logger.LogInformation($"Updated {player.Name} goals: +{playerGoal.Value} (total: {player.goalsScored})");
+                        }
+                        else
+                        {
+                            _logger.LogWarning($"Player with ID {playerGoal.Key} not found in country {country.Name}");
+                        }
+                    }
+                    _logger.LogInformation($"Updated goal counts for {updatedCount} players in {country.Name}");
+                }
+
+                // Update team statistics
+                country.Statistics.MatchesPlayed++;
+
+                if (won)
+                {
+                    country.Statistics.Wins++;
+                }
+                else if (drew)
+                {
+                    country.Statistics.Draws++;
+                }
+                else
+                {
+                    country.Statistics.Losses++;
+                }
+
+                if (tournamentWon)
+                {
+                    country.Statistics.TournamentsWon++;
+                }
+
+                // Save to firestore
+                await UpdateCountryAsync(countryId, country);
+
+                _logger.LogInformation($"Updated statistics for {country.Name}: Played={country.Statistics.MatchesPlayed}, Wins={country.Statistics.Wins}, Losses={country.Statistics.Losses}, Draws={country.Statistics.Draws}, Tournaments={country.Statistics.TournamentsWon}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error updating match results for country ID {countryId}");
+                throw;
+            }
+        }
+
         // Get leaderboard data for top teams and top players
         public async Task<LeaderboardViewModel> GetLeaderboardDataAsync()
         {

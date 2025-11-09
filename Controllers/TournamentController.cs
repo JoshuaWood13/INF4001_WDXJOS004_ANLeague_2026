@@ -683,20 +683,78 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
                     return;
                 }
 
-                // Generate match result with AI 
-                MatchCommentaryResult matchResult;
+                // Initialize in-memory data structures for building final result
+                var commentary = new List<CommentaryMoment>();
+                var goalScorers = new List<Goal>();
+                var playerGoalCounts = new Dictionary<string, int>();
+                int homeScore = 0;
+                int awayScore = 0;
+
+                var countries = await _countryService.GetCountriesByIdsAsync(new List<string> { match.HomeCountryId, match.AwayCountryId });
+                countries.TryGetValue(match.HomeCountryId, out var homeCountry);
+                countries.TryGetValue(match.AwayCountryId, out var awayCountry);
+
+                // Create player-to-country dictionaries for goal tracking
+                var playerToCountryId = new Dictionary<string, string>();
+                if (homeCountry != null)
+                {
+                    foreach (var player in homeCountry.Players)
+                    {
+                        playerToCountryId[player.Id] = match.HomeCountryId;
+                    }
+                }
+                if (awayCountry != null)
+                {
+                    foreach (var player in awayCountry.Players)
+                    {
+                        playerToCountryId[player.Id] = match.AwayCountryId;
+                    }
+                }
+
+                // Stream match events from AI
+                IAsyncEnumerable<CommentaryMoment> matchStream;
                 if (mode == "play")
                 {
-                    matchResult = await _matchService.PlayMatchAsync(match.HomeCountryId, match.AwayCountryId);
+                    matchStream = _matchService.PlayMatchAsync(match.HomeCountryId, match.AwayCountryId);
                 }
                 else
                 {
-                    matchResult = await _matchService.SimulateMatchAsync(match.HomeCountryId, match.AwayCountryId);
+                    matchStream = _matchService.SimulateMatchAsync(match.HomeCountryId, match.AwayCountryId);
                 }
 
-                // Stream commentary events
-                foreach (var moment in matchResult.Commentary.OrderBy(c => c.Minute))
+                await foreach (var moment in matchStream)
                 {
+                    // Add event to memory
+                    commentary.Add(moment);
+                    
+                    // Update scores from event
+                    homeScore = moment.HomeScore;
+                    awayScore = moment.AwayScore;
+
+                    // Track goals
+                    if (moment.Type == Models.Enums.CommentaryType.Goal && !string.IsNullOrEmpty(moment.PlayerId))
+                    {
+                        if (playerToCountryId.TryGetValue(moment.PlayerId, out var countryId))
+                        {
+                            // Add to goal scorers
+                            goalScorers.Add(new Goal
+                            {
+                                PlayerId = moment.PlayerId,
+                                PlayerName = moment.PlayerName,
+                                CountryId = countryId,
+                                Minute = moment.Minute
+                            });
+
+                            // Track player goal counts
+                            if (!playerGoalCounts.ContainsKey(moment.PlayerId))
+                            {
+                                playerGoalCounts[moment.PlayerId] = 0;
+                            }
+                            playerGoalCounts[moment.PlayerId]++;
+                        }
+                    }
+
+                    // Send using SSE
                     var eventData = new
                     {
                         minute = moment.Minute,
@@ -711,36 +769,37 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
                     await Response.Body.FlushAsync();
                 }
 
+                // Determine winner from final scores
+                string winnerId = homeScore > awayScore ? match.HomeCountryId : match.AwayCountryId;
+
                 // Send final match result
                 var finalData = new
                 {
                     matchId = matchId,
-                    homeScore = matchResult.HomeScore,
-                    awayScore = matchResult.AwayScore,
-                    winnerId = matchResult.WinnerId,
+                    homeScore = homeScore,
+                    awayScore = awayScore,
+                    winnerId = winnerId,
                     status = "Completed"
                 };
 
                 await WriteSSEData("matchComplete", System.Text.Json.JsonSerializer.Serialize(finalData));
                 await Response.Body.FlushAsync();
 
-                // Update match entity with results
-                match.HomeScore = matchResult.HomeScore;
-                match.AwayScore = matchResult.AwayScore;
+                // Update match entity with final results
+                match.HomeScore = homeScore;
+                match.AwayScore = awayScore;
                 match.Status = "Completed";
                 match.MatchType = mode == "play" ? "Played" : "Simulated";
-                match.WinnerId = matchResult.WinnerId;
-                match.GoalScorers = matchResult.GoalScorers;
-                match.Commentary = matchResult.Commentary;
+                match.WinnerId = winnerId;
+                match.GoalScorers = goalScorers;
+                match.Commentary = commentary;
                 match.MatchDate = DateTime.UtcNow;
 
                 // Update tournament with completed match
                 tournament.Matches[matchId] = match;
                 await _firebaseService.UpdateDocumentAsync("tournaments", tournament.Id, tournament);
 
-                _logger.LogInformation($"Match {matchId} completed: {matchResult.HomeCountryName} {matchResult.HomeScore}-{matchResult.AwayScore} {matchResult.AwayCountryName}");
-
-                // Update stats and progress winner in background
+                // Update data in firestore + progress winner in background
                 _ = Task.Run(async () =>
                 {
                     try
@@ -754,38 +813,30 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
                             var updateTasks = new List<Task>();
 
                             // Update player goal counts for both teams
-                            var homePlayerGoals = matchResult.PlayerGoalCounts
+                            var homePlayerGoals = playerGoalCounts
                                 .Where(kvp => homeCountry.Players.Any(p => p.Id == kvp.Key))
                                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
-                            var awayPlayerGoals = matchResult.PlayerGoalCounts
+                            var awayPlayerGoals = playerGoalCounts
                                 .Where(kvp => awayCountry.Players.Any(p => p.Id == kvp.Key))
                                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
-                            if (homePlayerGoals.Any())
-                            {
-                                updateTasks.Add(_countryService.UpdatePlayerGoalsAsync(match.HomeCountryId, homePlayerGoals));
-                            }
-
-                            if (awayPlayerGoals.Any())
-                            {
-                                updateTasks.Add(_countryService.UpdatePlayerGoalsAsync(match.AwayCountryId, awayPlayerGoals));
-                            }
-
-                            bool homeWon = matchResult.WinnerId == match.HomeCountryId;
-                            bool awayWon = matchResult.WinnerId == match.AwayCountryId;
+                            bool homeWon = winnerId == match.HomeCountryId;
+                            bool awayWon = winnerId == match.AwayCountryId;
                             bool isFinalMatch = matchId == "Final";
 
-                            // Update team statistics
-                            updateTasks.Add(_countryService.UpdateTeamStatisticsAsync(
+                            // Update match results
+                            updateTasks.Add(_countryService.UpdateMatchResultsAsync(
                                 match.HomeCountryId,
+                                homePlayerGoals,
                                 won: homeWon,
                                 drew: false,
                                 tournamentWon: isFinalMatch && homeWon
                             ));
 
-                            updateTasks.Add(_countryService.UpdateTeamStatisticsAsync(
+                            updateTasks.Add(_countryService.UpdateMatchResultsAsync(
                                 match.AwayCountryId,
+                                awayPlayerGoals,
                                 won: awayWon,
                                 drew: false,
                                 tournamentWon: isFinalMatch && awayWon
@@ -796,9 +847,9 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
                         }
 
                         // Progress winner to next round
-                        if (!string.IsNullOrEmpty(matchResult.WinnerId))
+                        if (!string.IsNullOrEmpty(winnerId))
                         {
-                            await _tournamentService.ProgressWinnerToNextRoundAsync(tournament.Id, matchId, matchResult.WinnerId);
+                            await _tournamentService.ProgressWinnerToNextRoundAsync(tournament.Id, matchId, winnerId);
                         }
 
                         _logger.LogInformation($"Background updates completed for match {matchId}");

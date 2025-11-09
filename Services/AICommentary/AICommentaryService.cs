@@ -29,211 +29,232 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.AICommentary
 
         // Methods
         //------------------------------------------------------------------------------------------------------------------------------------------//
-        // Get a detailed play-by-play commentary for a played match and return a compiled result 
-        public async Task<MatchCommentaryResult> GetPlayMatchCommentaryAsync(string homeCountryId, string homeCountryName, List<Player> homePlayers, string awayCountryId, string awayCountryName, List<Player> awayPlayers)
+        // Stream play-by-play commentary for a played match as events arrive from AI
+        public async IAsyncEnumerable<CommentaryMoment> StreamPlayMatchCommentaryAsync(string homeCountryId, string homeCountryName, List<Player> homePlayers, string awayCountryId, string awayCountryName, List<Player> awayPlayers)
         {
-            _logger.LogInformation($"Generating play commentary for {homeCountryName} vs {awayCountryName}");
+            _logger.LogInformation($"Streaming play commentary for {homeCountryName} vs {awayCountryName}");
 
             // Create player dictionaries
             var homePlayerDict = homePlayers.ToDictionary(p => p.Name, p => p.Id, StringComparer.OrdinalIgnoreCase);
             var awayPlayerDict = awayPlayers.ToDictionary(p => p.Name, p => p.Id, StringComparer.OrdinalIgnoreCase);
 
-            // Generate AI commentary (all events)
-            var matchData = await GeneratePlayMatchCommentary(homeCountryName, homePlayers, awayCountryName, awayPlayers);
-
-            // Compile result
-            var result = CompileMatchResult(matchData, homeCountryId, awayCountryId, homePlayerDict, awayPlayerDict);
-
-            _logger.LogInformation($"Generated {result.Commentary.Count} commentary moments. Final: {result.HomeScore}-{result.AwayScore}");
-
-            return result;
-        }
-
-        // Get simple commentary for a simulated match and return a compiled result
-        public async Task<MatchCommentaryResult> GetSimulateMatchCommentaryAsync(string homeCountryId, string homeCountryName, List<Player> homePlayers, string awayCountryId, string awayCountryName, List<Player> awayPlayers) 
-        {
-            _logger.LogInformation($"Generating simulate commentary for {homeCountryName} vs {awayCountryName}");
-
-            // Create player dictionaries
-            var homePlayerDict = homePlayers.ToDictionary(p => p.Name, p => p.Id, StringComparer.OrdinalIgnoreCase);
-            var awayPlayerDict = awayPlayers.ToDictionary(p => p.Name, p => p.Id, StringComparer.OrdinalIgnoreCase);
-
-            // Generate AI commentary (goals only)
-            var matchData = await GenerateSimulateMatchCommentary(homeCountryName, homePlayers, awayCountryName, awayPlayers);
-
-            // Compile result 
-            var result = CompileMatchResult(matchData, homeCountryId, awayCountryId, homePlayerDict, awayPlayerDict);
-
-            _logger.LogInformation($"Simulated match: {result.HomeScore}-{result.AwayScore}");
-
-            return result;
-        }
-
-        // Generate AI play-by-play commentary for a match 
-        private async Task<MatchDataResponse> GeneratePlayMatchCommentary(string homeTeam, List<Player> homePlayers, string awayTeam, List<Player> awayPlayers)
-        {
-            // Get all players by position
+            // Get all players by position for prompt
             var homeAttackers = GetPlayerNamesByPosition(homePlayers, "AT");
             var homeDefenders = GetPlayerNamesByPosition(homePlayers, "DF");
             var homeGoalkeepers = GetPlayerNamesByPosition(homePlayers, "GK");
-
             var awayAttackers = GetPlayerNamesByPosition(awayPlayers, "AT");
             var awayDefenders = GetPlayerNamesByPosition(awayPlayers, "DF");
             var awayGoalkeepers = GetPlayerNamesByPosition(awayPlayers, "GK");
 
-            // Get prompt
-            var prompt = AiPrompts.GetPlayMatchCommentaryPrompt(homeTeam, homeAttackers, homeDefenders, homeGoalkeepers, awayTeam, awayAttackers, awayDefenders, awayGoalkeepers);
+            // Generate prompt and stream commentary from AI
+            var prompt = AiPrompts.GetPlayMatchCommentaryPrompt(homeCountryName, homeAttackers, homeDefenders, homeGoalkeepers, awayCountryName, awayAttackers, awayDefenders, awayGoalkeepers);
 
-            // Generate commentary
-            var response = await _model.GenerateContentAsync(prompt);
-
-            // Clean response
-            var jsonText = CleanJsonResponse(response.Text);
-            
-            try
+            await foreach (var moment in StreamAICommentaryEvents(prompt, homeCountryId, awayCountryId, homePlayerDict, awayPlayerDict))
             {
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true,
-                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-                };
+                yield return moment;
+            }
 
-                var result = JsonSerializer.Deserialize<MatchDataResponse>(jsonText, options);
-                if (result == null)
-                {
-                    _logger.LogError("Failed to parse AI response - deserialization returned null");
-                    throw new Exception("Failed to parse AI response - deserialization returned null");
-                }
-                
-                return result;
-            }
-            catch (JsonException ex)
-            {
-                _logger.LogError($"JSON parsing error: {ex.Message}");
-                throw new Exception($"Failed to parse AI response: {ex.Message}", ex);
-            }
+            _logger.LogInformation($"Completed streaming play commentary for {homeCountryName} vs {awayCountryName}");
         }
 
-        // Generate AI goal commentary for a simulated match
-        private async Task<MatchDataResponse> GenerateSimulateMatchCommentary(string homeTeam, List<Player> homePlayers, string awayTeam, List<Player> awayPlayers)
+        // Stream goal commentary for a simulated match as events arrive from AI
+        public async IAsyncEnumerable<CommentaryMoment> StreamSimulateMatchCommentaryAsync(string homeCountryId, string homeCountryName, List<Player> homePlayers, string awayCountryId, string awayCountryName, List<Player> awayPlayers)
         {
-            // Get attackers only
+            _logger.LogInformation($"Streaming simulate commentary for {homeCountryName} vs {awayCountryName}");
+
+            // Create player dictionaries
+            var homePlayerDict = homePlayers.ToDictionary(p => p.Name, p => p.Id, StringComparer.OrdinalIgnoreCase);
+            var awayPlayerDict = awayPlayers.ToDictionary(p => p.Name, p => p.Id, StringComparer.OrdinalIgnoreCase);
+
+            // Get attackers only for prompt
             var homeAttackers = GetPlayerNamesByPosition(homePlayers, "AT");
             var awayAttackers = GetPlayerNamesByPosition(awayPlayers, "AT");
 
-            // Get prompt
-            var prompt = AiPrompts.GetSimulateMatchCommentaryPrompt(homeTeam, homeAttackers, awayTeam, awayAttackers);
+            // Generate prompt and stream commentary from AI
+            var prompt = AiPrompts.GetSimulateMatchCommentaryPrompt(homeCountryName, homeAttackers, awayCountryName, awayAttackers);
 
-            // Generate commentary
-            var response = await _model.GenerateContentAsync(prompt);
-
-            // Clean response
-            var jsonText = CleanJsonResponse(response.Text);
-            
-            try
+            await foreach (var moment in StreamAICommentaryEvents(prompt, homeCountryId, awayCountryId, homePlayerDict, awayPlayerDict))
             {
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true,
-                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-                };
-
-                var result = JsonSerializer.Deserialize<MatchDataResponse>(jsonText, options);
-                if (result == null)
-                {
-                    _logger.LogError("Failed to parse AI simulation response - deserialization returned null");
-                    throw new Exception("Failed to parse AI simulation response - deserialization returned null");
-                }
-                
-                return result;
+                yield return moment;
             }
-            catch (JsonException ex)
+
+            _logger.LogInformation($"Completed streaming simulate commentary for {homeCountryName} vs {awayCountryName}");
+        }
+
+        // Stream AI commentary events and parse NDJSON lines into CommentaryMoment objects
+        private async IAsyncEnumerable<CommentaryMoment> StreamAICommentaryEvents(string prompt, string homeCountryId, string awayCountryId, Dictionary<string, string> homePlayerDict, Dictionary<string, string> awayPlayerDict)
+        {
+            var buffer = new System.Text.StringBuilder();
+            var options = new JsonSerializerOptions
             {
-                _logger.LogError($"JSON parsing error: {ex.Message}");
-                throw new Exception($"Failed to parse AI simulation response: {ex.Message}", ex);
+                PropertyNameCaseInsensitive = true,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            };
+
+            await foreach (var chunk in _model.StreamContentAsync(prompt))
+            {
+                if (string.IsNullOrEmpty(chunk.Text))
+                    continue;
+
+                buffer.Append(chunk.Text);
+
+                // Process complete lines
+                var text = buffer.ToString();
+                var lines = text.Split('\n');
+
+                // Process all complete lines 
+                for (int i = 0; i < lines.Length - 1; i++)
+                {
+                    var line = lines[i].Trim();
+                    if (string.IsNullOrEmpty(line))
+                        continue;
+
+                    // Clean markdown if present
+                    line = CleanJsonResponse(line);
+                    
+                    if (string.IsNullOrEmpty(line))
+                        continue;
+
+                    // Parse line
+                    var moment = ParseNDJSONEventLine(line, homeCountryId, awayCountryId, homePlayerDict, awayPlayerDict, options);
+                    
+                    if (moment != null)
+                    {
+                        yield return moment;
+                    }
+                }
+
+                // Keep the last incomplete line in buffer
+                buffer.Clear();
+                buffer.Append(lines[lines.Length - 1]);
+            }
+
+            // Process any remaining content in buffer
+            var finalLine = buffer.ToString().Trim();
+            if (!string.IsNullOrEmpty(finalLine))
+            {
+                finalLine = CleanJsonResponse(finalLine);
+                
+                if (!string.IsNullOrEmpty(finalLine))
+                {
+                    var moment = ParseNDJSONEventLine(finalLine, homeCountryId, awayCountryId, homePlayerDict, awayPlayerDict, options);
+                    
+                    if (moment != null)
+                    {
+                        yield return moment;
+                    }
+                }
             }
         }
 
-        // Compile match result data into commentary models and return it for easy display and Firestore updates 
-        private MatchCommentaryResult CompileMatchResult(MatchDataResponse matchData, string homeCountryId, string awayCountryId, Dictionary<string, string> homePlayerDict, Dictionary<string, string> awayPlayerDict)
+        // Parse an NDJSON line into a commentary moment
+        private CommentaryMoment? ParseNDJSONEventLine(string line, string homeCountryId, string awayCountryId, Dictionary<string, string> homePlayerDict, Dictionary<string, string> awayPlayerDict, JsonSerializerOptions options)
         {
-            var result = new MatchCommentaryResult
+            try
             {
-                HomeScore = matchData.HomeScore,
-                AwayScore = matchData.AwayScore,
-                WinnerId = matchData.HomeScore > matchData.AwayScore ? homeCountryId : awayCountryId
-            };
+                var eventData = JsonSerializer.Deserialize<JsonElement>(line, options);
+                return ConvertJsonEventToCommentaryMoment(eventData, homeCountryId, awayCountryId, homePlayerDict, awayPlayerDict);
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogWarning($"Failed to parse NDJSON line: {line}. Error: {ex.Message}");
+                return null;
+            }
+        }
 
-            // Add each event to commentary
-            foreach (var evt in matchData.Events.OrderBy(e => e.Minute))
+        // Convert a JSON event element into a commentary moment object
+        private CommentaryMoment? ConvertJsonEventToCommentaryMoment(JsonElement eventData, string homeCountryId, string awayCountryId, Dictionary<string, string> homePlayerDict, Dictionary<string, string> awayPlayerDict)
+        {
+            try
             {
                 var moment = new CommentaryMoment
                 {
-                    Minute = evt.Minute,
-                    Type = ParseEventType(evt.EventType),
-                    Description = evt.Description,
-                    HomeScore = evt.HomeScore,
-                    AwayScore = evt.AwayScore,
-                    PlayerName = evt.PlayerName
+                    Minute = eventData.GetProperty("minute").GetInt32(),
+                    Type = ParseEventType(eventData.GetProperty("eventType").GetString() ?? "KickOff"),
+                    Description = eventData.GetProperty("description").GetString() ?? "",
+                    HomeScore = eventData.GetProperty("homeScore").GetInt32(),
+                    AwayScore = eventData.GetProperty("awayScore").GetInt32()
                 };
 
-                if (!string.IsNullOrEmpty(evt.PlayerName))
+                // Get player name if present
+                if (eventData.TryGetProperty("playerName", out var playerNameElement))
                 {
-                    if (homePlayerDict.TryGetValue(evt.PlayerName, out var playerId))
+                    var playerName = playerNameElement.GetString();
+                    if (!string.IsNullOrEmpty(playerName))
                     {
-                        moment.PlayerId = playerId;
-                    }
-                    else if (awayPlayerDict.TryGetValue(evt.PlayerName, out var playerId2))
-                    {
-                        moment.PlayerId = playerId2;
+                        moment.PlayerName = playerName;
+                        
+                        if (homePlayerDict.TryGetValue(playerName, out var homePlayerId))
+                        {
+                            moment.PlayerId = homePlayerId;
+                        }
+                        else if (awayPlayerDict.TryGetValue(playerName, out var awayPlayerId))
+                        {
+                            moment.PlayerId = awayPlayerId;
+                        }
+                        else
+                        {
+                            var cleanedName = playerName;
+                            
+                            // Remove text in parentheses
+                            var parenIndex = cleanedName.IndexOf('(');
+                            if (parenIndex > 0)
+                            {
+                                cleanedName = cleanedName.Substring(0, parenIndex).Trim();
+                            }
+                            
+                            // Try matching with cleaned name
+                            if (!string.IsNullOrEmpty(cleanedName) && cleanedName != playerName)
+                            {
+                                if (homePlayerDict.TryGetValue(cleanedName, out var homePlayerId2))
+                                {
+                                    moment.PlayerId = homePlayerId2;
+                                }
+                                else if (awayPlayerDict.TryGetValue(cleanedName, out var awayPlayerId2))
+                                {
+                                    moment.PlayerId = awayPlayerId2;
+                                }
+                            }
+                            
+                            // Try partial matching 
+                            if (string.IsNullOrEmpty(moment.PlayerId))
+                            {
+                                foreach (var kvp in homePlayerDict)
+                                {
+                                    if (kvp.Key.Equals(cleanedName, StringComparison.OrdinalIgnoreCase) ||
+                                        kvp.Key.Contains(cleanedName, StringComparison.OrdinalIgnoreCase) ||
+                                        cleanedName.Contains(kvp.Key, StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        moment.PlayerId = kvp.Value;
+                                        break;
+                                    }
+                                }
+                                
+                                if (string.IsNullOrEmpty(moment.PlayerId))
+                                {
+                                    foreach (var kvp in awayPlayerDict)
+                                    {
+                                        if (kvp.Key.Equals(cleanedName, StringComparison.OrdinalIgnoreCase) ||
+                                            kvp.Key.Contains(cleanedName, StringComparison.OrdinalIgnoreCase) ||
+                                            cleanedName.Contains(kvp.Key, StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            moment.PlayerId = kvp.Value;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
 
-                result.Commentary.Add(moment);
-
-                // Find goals
-                if (evt.EventType == "Goal" && !string.IsNullOrEmpty(evt.PlayerName))
-                {
-                    string? playerId = null;
-                    string? countryId = null;
-
-                    if (homePlayerDict.TryGetValue(evt.PlayerName, out var homePlayerId))
-                    {
-                        playerId = homePlayerId;
-                        countryId = homeCountryId;
-                    }
-
-                    else if (awayPlayerDict.TryGetValue(evt.PlayerName, out var awayPlayerId))
-                    {
-                        playerId = awayPlayerId;
-                        countryId = awayCountryId;
-                    }
-                    else
-                    {
-                        _logger.LogWarning($"Could not find player ID for goal scorer: {evt.PlayerName}");
-                        continue;
-                    }
-
-                    // Add to goal scorers list
-                    result.GoalScorers.Add(new Goal
-                    {
-                        PlayerId = playerId,
-                        PlayerName = evt.PlayerName,
-                        CountryId = countryId,
-                        Minute = evt.Minute
-                    });
-
-                    // Track player goal counts for goal updates
-                    if (!result.PlayerGoalCounts.ContainsKey(playerId))
-                    {
-                        result.PlayerGoalCounts[playerId] = 0;
-                    }
-
-                    result.PlayerGoalCounts[playerId]++;
-                }
+                return moment;
             }
-
-            return result;
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Error parsing event to CommentaryMoment: {ex.Message}");
+                return null;
+            }
         }
 
         private string GetPlayerNamesByPosition(List<Player> players, string position)
@@ -279,25 +300,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.AICommentary
                 _ => CommentaryType.KickOff
             };
         }
-    }
-    //------------------------------------------------------------------------------------------------------------------------------------------//
-    // Service response models
-    public class MatchDataResponse
-    {
-        public int HomeScore { get; set; }
-        public int AwayScore { get; set; }
-        public List<MatchEvent> Events { get; set; } = new List<MatchEvent>();
-    }
-
-    public class MatchEvent
-    {
-        public int Minute { get; set; }
-        public string EventType { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public int HomeScore { get; set; }
-        public int AwayScore { get; set; }
-        public string? PlayerName { get; set; }
-    }
+    } 
     //------------------------------------------------------------------------------------------------------------------------------------------//
 }
 //--------------------------------------------------------X END OF FILE X-------------------------------------------------------------------//

@@ -38,47 +38,24 @@ DESCRIPTION STYLE (keep concise, 1-2 sentences, be creative and varied):
 - YellowCard/RedCard: State the card and reason
 - KickOff/HalfTime/FullTime: Brief match status update
 
-JSON FORMAT (respond with ONLY this, no markdown):
-{{
-  ""homeScore"": X,
-  ""awayScore"": Y,
-  ""events"": [
-    {{
-      ""minute"": 1,
-      ""eventType"": ""KickOff"",
-      ""description"": ""We're underway in this thrilling encounter!"",
-      ""homeScore"": [cumulative],
-      ""awayScore"": [cumulative],
-      ""playerName"": null
-    }},
-    {{
-      ""minute"": [varies],
-      ""eventType"": ""Goal"",
-      ""description"": ""GOAL! A stunning strike finds the net!"",
-      ""homeScore"": [cumulative],
-      ""awayScore"": [cumulative],
-      ""playerName"": ""[exact name from attacker list]""
-    }},
-    {{
-      ""minute"": 45,
-      ""eventType"": ""HalfTime"",
-      ""description"": ""Half-time whistle blows."",
-      ""homeScore"": [cumulative],
-      ""awayScore"": [cumulative],
-      ""playerName"": null
-    }},
-    {{
-      ""minute"": 90,
-      ""eventType"": ""FullTime"",
-      ""description"": ""Full-time! What a match!"",
-      ""homeScore"": X,
-      ""awayScore"": Y,
-      ""playerName"": null
-    }}
-  ]
-}}
+NDJSON FORMAT (respond with ONLY this, no markdown, ONE EVENT PER LINE):
+Output each event as a complete JSON object on its own line (newline-delimited JSON).
+DO NOT wrap in an outer object or array.
+Each line must be valid JSON with these exact fields:
 
-EVENT TYPES: KickOff, Goal, Save, NearMiss, Foul, YellowCard, RedCard, HalfTime, FullTime, ExtraTime Start, Penalties
+{{""minute"":1,""eventType"":""KickOff"",""description"":""We're underway in this thrilling encounter!"",""homeScore"":0,""awayScore"":0,""playerName"":null}}
+{{""minute"":15,""eventType"":""Goal"",""description"":""GOAL! A stunning strike finds the net!"",""homeScore"":1,""awayScore"":0,""playerName"":""[exact name from attacker list]""}}
+{{""minute"":45,""eventType"":""HalfTime"",""description"":""Half-time whistle blows."",""homeScore"":1,""awayScore"":0,""playerName"":null}}
+{{""minute"":90,""eventType"":""FullTime"",""description"":""Full-time! What a match!"",""homeScore"":1,""awayScore"":0,""playerName"":null}}
+
+IMPORTANT:
+- Each event MUST be on a separate line
+- Each event includes cumulative homeScore and awayScore
+- The final event contains the final scores
+- NO outer JSON structure, NO array brackets
+- Each line must be parseable as standalone JSON
+
+EVENT TYPES: KickOff, Goal, Save, NearMiss, Foul, YellowCard, RedCard, HalfTime, FullTime, ExtraTimeStart, Penalties
 
 Generate exciting, realistic match!";
         }
@@ -113,38 +90,23 @@ PLAYER USAGE:
 DESCRIPTION STYLE (be brief but ALWAYS include player name):
 - Goal: Simple goal announcement with player name (e.g., ""[Player Name] scores!"")
 
-JSON FORMAT REQUIREMENTS:
-- Respond with ONLY valid JSON (no markdown, no code blocks, no explanations)
-- ""minute"" field: INTEGER only (e.g., 23)
-- ""eventType"" field: Must be ""Goal""
-- ""description"" field: STRING with brief commentary including player name
-- ""homeScore"" and ""awayScore"" fields: INTEGERS showing cumulative score at that moment
-- ""playerName"" field: Exact attacker name from squad lists as STRING
-- Events must be in chronological order by minute
+NDJSON FORMAT (respond with ONLY this, no markdown, ONE EVENT PER LINE):
+Output each event as a complete JSON object on its own line (newline-delimited JSON).
+DO NOT wrap in an outer object or array.
+Each line must be valid JSON with these exact fields:
 
-RESPONSE FORMAT EXAMPLE (DO NOT copy these exact scores - vary them!):
-{{
-  ""homeScore"": X,
-  ""awayScore"": Y,
-  ""events"": [
-    {{
-      ""minute"": [varies],
-      ""eventType"": ""Goal"",
-      ""description"": ""[Player Name] scores!"",
-      ""homeScore"": [cumulative],
-      ""awayScore"": [cumulative],
-      ""playerName"": ""[exact attacker name]""
-    }},
-    {{
-      ""minute"": [varies],
-      ""eventType"": ""Goal"",
-      ""description"": ""[Player Name] finds the net!"",
-      ""homeScore"": [cumulative],
-      ""awayScore"": [cumulative],
-      ""playerName"": ""[exact attacker name]""
-    }}
-  ]
-}}
+{{""minute"":23,""eventType"":""Goal"",""description"":""[Player Name] scores!"",""homeScore"":1,""awayScore"":0,""playerName"":""[exact attacker name]""}}
+{{""minute"":67,""eventType"":""Goal"",""description"":""[Player Name] finds the net!"",""homeScore"":1,""awayScore"":1,""playerName"":""[exact attacker name]""}}
+
+IMPORTANT:
+- Each event MUST be on a separate line
+- Each event includes cumulative homeScore and awayScore
+- The final event contains the final scores
+- NO outer JSON structure, NO array brackets
+- Each line must be parseable as standalone JSON
+- ""minute"" field: INTEGER only
+- ""eventType"" field: Must be ""Goal""
+- ""playerName"" field: Exact attacker name from squad lists
 
 Generate realistic match with varied outcomes!";
         }

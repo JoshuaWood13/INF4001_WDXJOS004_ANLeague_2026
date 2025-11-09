@@ -1,9 +1,17 @@
 @model INF4001_WDXJOS004_ANLeague_2026.Models.ViewModels.MatchDetailViewModel
 
+@functions {
+    // Convert event type enums to a more user-friendly format
+    string FormatEventType(string eventType)
+    {
+        return System.Text.RegularExpressions.Regex.Replace(eventType, "(\\B[A-Z])", " $1");
+    }
+}
+
 <link rel="stylesheet" href="~/css/match-details.css" asp-append-version="true" />
 
 @if (Model.IsLoading)
-{
+{ 
     <!-- Data container for JS -->
     <div id="matchDetailsData" 
          data-match-id="@Model.Match.Id" 
@@ -72,7 +80,7 @@
                         <div class="event-item @moment.Type.ToString().ToLower()">
                             <div class="event-header">
                                 <span class="event-time">@moment.Minute'</span>
-                                <span class="event-type">@moment.Type.ToString()</span>
+                                <span class="event-type">@FormatEventType(moment.Type.ToString())</span>
                             </div>
                             <div class="event-description">@moment.Description</div>
                             

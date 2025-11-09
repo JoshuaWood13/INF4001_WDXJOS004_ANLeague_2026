@@ -12,8 +12,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const mode = matchDetailsContainer.dataset.mode;
     const streamUrl = matchDetailsContainer.dataset.streamUrl;
     
-    console.log('Starting SSE connection:', { matchId, mode, streamUrl });
-    
     const loadingState = document.getElementById('loadingState');
     const eventsList = document.getElementById('eventsList');
     const homeScoreEl = document.getElementById('homeScore');
@@ -26,8 +24,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Connect to SSE endpoint
     const eventSource = new EventSource(streamUrl);
     
+    // Format event type by adding spaces before capital letters
+    function formatEventType(eventType) {
+        return eventType.replace(/([a-z])([A-Z])/g, '$1 $2');
+    }
     function displayEvent(event) {
-        console.log('Displaying event:', event.minute, event.type);
         // Hide loading state and show events list on first event
         if (loadingState && loadingState.style.display !== 'none') {
             loadingState.style.display = 'none';
@@ -47,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const eventType = document.createElement('span');
         eventType.className = 'event-type';
-        eventType.textContent = event.type;
+        eventType.textContent = formatEventType(event.type);
         
         eventHeader.appendChild(eventTime);
         eventHeader.appendChild(eventType);
@@ -101,11 +102,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Process event queue with 1-second delays
     async function processQueue() {
         if (isProcessingQueue) {
-            console.log('Already processing queue, skipping...');
             return;
         }
         
-        console.log('Queue processor started');
         isProcessingQueue = true;
         
         while (true) {
@@ -113,7 +112,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (eventQueue.length === 0) {
                 // Check if SSE is still connected
                 if (eventSource.readyState === EventSource.CLOSED) {
-                    console.log('SSE closed and queue empty, stopping processor');
                     break;
                 }
 
@@ -122,15 +120,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             const event = eventQueue.shift();
-            console.log('Processing event:', event.minute, event.type, '- Queue remaining:', eventQueue.length);
             displayEvent(event);
             
             // Wait 1 second before displaying next event 
-            console.log('Waiting 1 second before next event...');
             await new Promise(resolve => setTimeout(resolve, 1000));
         }
         
-        console.log('Queue processing complete');
         isProcessingQueue = false;
     }
     
@@ -138,9 +133,7 @@ document.addEventListener('DOMContentLoaded', function() {
     eventSource.addEventListener('commentary', function(e) {
         try {
             const event = JSON.parse(e.data);
-            console.log('Received event from SSE:', event.minute, event.type);
             eventQueue.push(event);
-            console.log('Event added to queue. Total in queue:', eventQueue.length);
             
             // Only start processor if not already running
             if (!isProcessingQueue) {

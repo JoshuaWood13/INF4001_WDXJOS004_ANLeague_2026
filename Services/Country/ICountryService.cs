@@ -17,6 +17,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Country
         Task UpdateCountryAsync(string countryId, CountryEntity country);
         Task UpdateTeamStatisticsAsync(string countryId, bool won, bool drew, bool tournamentWon);
         Task UpdatePlayerGoalsAsync(string countryId, Dictionary<string, int> playerGoalCounts);
+        Task UpdateMatchResultsAsync(string countryId, Dictionary<string, int> playerGoalCounts, bool won, bool drew, bool tournamentWon);
         Task<LeaderboardViewModel> GetLeaderboardDataAsync();
     }
 }
