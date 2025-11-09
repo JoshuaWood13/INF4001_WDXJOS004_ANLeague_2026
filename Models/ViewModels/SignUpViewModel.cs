@@ -9,7 +9,9 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Models.ViewModels
         public string Email { get; set; }
 
         [Required(ErrorMessage = "Password is required")]
-        [MinLength(8, ErrorMessage = "Password must be at least 6 characters")]
+        [MinLength(8, ErrorMessage = "Password must be at least 8 characters")]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\da-zA-Z]).{8,}$", 
+            ErrorMessage = "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character")]
         public string Password { get; set; }
 
         [Required(ErrorMessage = "Please confirm your password")]

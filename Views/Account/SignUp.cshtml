@@ -1,6 +1,16 @@
 @model INF4001_WDXJOS004_ANLeague_2026.Models.ViewModels.SignUpViewModel
 @using INF4001_WDXJOS004_ANLeague_2026.Data
 
+<!-- Firebase Error Alert -->
+@if (TempData["FirebaseError"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show error-message position-fixed"
+         style="top: 80px; right: 20px; z-index: 1100; max-width: 400px;" id="firebaseError">
+        <strong>Error!</strong> @TempData["FirebaseError"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
@@ -11,41 +21,57 @@
                 <div class="card-body">
 
                     <!-- Form -->
-                    <form asp-action="SignUpUser" method="post">
+                    <form asp-action="SignUpUser" method="post" id="signUpForm">
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 
                         <!-- Email -->
                         <div class="mb-3">
                             <label asp-for="Email" class="form-label">Email Address</label>
-                            <input asp-for="Email" class="form-control" placeholder="your.email@example.com" />
-                            <span asp-validation-for="Email" class="text-danger"></span>
+                            <input asp-for="Email" 
+                                   class="form-control @(ViewData.ModelState["Email"]?.Errors.Count > 0 ? "is-invalid" : "")" 
+                                   placeholder="email@example.com"
+                                   data-val-required="Email address is required"
+                                   data-val-email="Please enter a valid email address" />
+                            <span asp-validation-for="Email" class="invalid-feedback"></span>
                         </div>
 
                         <!-- Country -->
                         <div class="mb-3">
                             <label asp-for="CountryName" class="form-label">Country</label>
-                            <select asp-for="CountryName" class="form-control">
-                                <option hidden disabled selected value="">Select Category</option>
+                            <select asp-for="CountryName" 
+                                    class="form-select @(ViewData.ModelState["CountryName"]?.Errors.Count > 0 ? "is-invalid" : "")"
+                                    data-val-required="Please select a country">
+                                <option hidden disabled selected value="">Select a Country</option>
                                 @foreach (var country in CountryList.AfricanCountries)
                                 {
                                     <option value="@country">@country</option>
                                 }
                             </select>
-                            <span asp-validation-for="CountryName" class="text-danger"></span>
+                            <span asp-validation-for="CountryName" class="invalid-feedback"></span>
                         </div>
 
                         <!-- Password -->
                         <div class="mb-3">
                             <label asp-for="Password" class="form-label">Password</label>
-                            <input asp-for="Password" type="password" class="form-control" placeholder="Minimum 6 characters" />
-                            <span asp-validation-for="Password" class="text-danger"></span>
+                            <input asp-for="Password" 
+                                   type="password" 
+                                   class="form-control @(ViewData.ModelState["Password"]?.Errors.Count > 0 ? "is-invalid" : "")" 
+                                   placeholder="Minimum 8 characters"
+                                   data-val-required="Password is required"
+                                   data-val-minlength="Password must be at least 8 characters" />
+                            <span asp-validation-for="Password" class="invalid-feedback"></span>
+                            <div class="form-text">Must be at least 8 characters with uppercase, lowercase, numbers, and a special character</div>
                         </div>
 
                         <!-- Confirm Password -->
                         <div class="mb-3">
                             <label asp-for="ConfirmPassword" class="form-label">Confirm Password</label>
-                            <input asp-for="ConfirmPassword" type="password" class="form-control" />
-                            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                            <input asp-for="ConfirmPassword" 
+                                   type="password" 
+                                   class="form-control @(ViewData.ModelState["ConfirmPassword"]?.Errors.Count > 0 ? "is-invalid" : "")"
+                                   data-val-required="Please confirm your password"
+                                   data-val-equalto="Passwords do not match" />
+                            <span asp-validation-for="ConfirmPassword" class="invalid-feedback"></span>
                         </div>
 
                         <!-- Button -->
@@ -63,5 +89,5 @@
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/signup-validation.js"></script>
 }

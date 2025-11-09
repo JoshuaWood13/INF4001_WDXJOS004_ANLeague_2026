@@ -52,15 +52,52 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Services.Auth
                 // Set custom claims for role-based acess
                 await SetCustomClaimsAsync(userRecord.Uid, role);
 
-                _logger.LogInformation($"User {email} succesfully with role {role}");
+                _logger.LogInformation($"User {email} successfully created with role {role}");
 
                 return userRecord.Uid;
+            }
+            catch (FirebaseAuthException fbEx)
+            {
+                _logger.LogError(fbEx, $"Firebase authentication error creating user: {fbEx.AuthErrorCode}");
+                
+                string userFriendlyMessage = ParseFirebaseError(fbEx.Message);
+                throw new ApplicationException(userFriendlyMessage);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating firebase user");
-                throw new Exception("Faild to create new user");
+                throw new Exception("Failed to create new user", ex);
             }
+        }
+
+        // Parse firebase error messages into user-friendly message
+        private string ParseFirebaseError(string firebaseMessage)
+        {
+            if (firebaseMessage.Contains("EMAIL_EXISTS") ||
+                firebaseMessage.Contains("email address is already in use", StringComparison.OrdinalIgnoreCase))
+            {
+                return "An account with this email address already exists.";
+            }
+
+            if (firebaseMessage.Contains("INVALID_EMAIL") ||
+                firebaseMessage.Contains("invalid email", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Please enter a valid email address.";
+            }
+
+            if (firebaseMessage.Contains("PASSWORD_DOES_NOT_MEET_REQUIREMENTS"))
+            {
+                return "Password must be at least 8 characters and include uppercase, lowercase, numbers, and a special character (!@#$%^&*).";
+            }
+
+            if (firebaseMessage.Contains("WEAK_PASSWORD") ||
+                firebaseMessage.Contains("Password should be at least", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Password is too weak. Please use at least 8 characters with uppercase, lowercase, and numbers.";
+            }
+
+            // Return a generic message parsing fails
+            return "Unable to create account. Please check your information and try again.";
         }
 
         // Set custom claims role for a user

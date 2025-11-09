@@ -96,10 +96,15 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
                 TempData["SuccessMessage"] = "Sign up successful!";
                 return RedirectToAction("Login");
             }
+            catch (ApplicationException appEx)
+            {
+                TempData["FirebaseError"] = appEx.Message;
+                return View("SignUp", viewModel);
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error during user sign up");
-                ModelState.AddModelError("", "An error occurred during sign up. Please try again.");
+                TempData["FirebaseError"] = "An unexpected error occurred during sign up. Please try again.";
                 return View("SignUp", viewModel);
             }
         }
@@ -192,28 +197,6 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
             Response.Cookies.Delete("FirebaseToken");
 
             return RedirectToAction("Index", "Home");
-        }
-
-        [HttpGet]
-        public IActionResult RegisterCountry()
-        {
-            // TODO: Return RegisterCountryViewModel with country list
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RegisterCountry1(/* RegisterCountryViewModel model */)
-        {
-            // TODO: Implement country registration logic
-            return View();
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> GeneratePlayers()
-        {
-            // TODO: Generate 23 random players, return JSON
-            return Json(new { success = false, message = "Not implemented" });
         }
         //------------------------------------------------------------------------------------------------------------------------------------------//
     }
