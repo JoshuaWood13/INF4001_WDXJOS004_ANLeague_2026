@@ -21,6 +21,10 @@ body {
   margin-bottom: 60px;
 }
 
+h2.fw-bold {
+    font-size: 2.5rem;
+}
+
 .navbar a.nav-link {
     transition: color 0.3s ease;
 }
