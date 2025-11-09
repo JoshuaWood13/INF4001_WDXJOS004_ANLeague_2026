@@ -187,9 +187,6 @@ INF4001_WDXJOS004_ANLeague_2026/
 │   ├── Country/
 │   │   ├── CountryService.cs
 │   │   └── ICountryService.cs
-│   ├── Email/
-│   │   ├── EmailService.cs
-│   │   └── IEmailService.cs
 │   ├── Firebase/
 │   │   ├── FirebaseService.cs
 │   │   └── IFirebaseService.cs
