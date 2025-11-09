@@ -157,19 +157,37 @@
     padding: 5px 12px;
     font-size: 12px;
     border-radius: 999px;
-    border: 1px solid #0d6efd;
     background-color: #fff;
-    color: #0d6efd;
     font-weight: 600;
     letter-spacing: 0.4px;
     transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease;
 }
 
-.match-actions button:hover,
-.match-actions button:focus {
-    background-color: #0d6efd;
+/* Play button */
+.match-actions button[data-action="play"] {
+    border: 1px solid #28a745;
+    color: #28a745;
+}
+
+.match-actions button[data-action="play"]:hover,
+.match-actions button[data-action="play"]:focus {
+    background-color: #28a745;
     color: #fff;
-    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.25);
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.25);
+    outline: none;
+}
+
+/* Simulate button */
+.match-actions button[data-action="simulate"] {
+    border: 1px solid #fd7e14;
+    color: #fd7e14;
+}
+
+.match-actions button[data-action="simulate"]:hover,
+.match-actions button[data-action="simulate"]:focus {
+    background-color: #fd7e14;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(253, 126, 20, 0.25);
     outline: none;
 }
 
@@ -279,6 +297,11 @@
     margin-left: 8px;
 }
 
+/* Completed Match Score */
+.team-row.match-completed .team-score {
+    color: #28a745;
+}
+
 .join-slot-btn {
     margin-left: 12px;
     padding: 4px 10px;
@@ -347,16 +370,16 @@
 
 /* Winner Styling */
 .team-row.winner {
-    background-color: #d1e7ff;
+    background-color: #e7f3ff;
 }
 
 .team-row.winner .team-name {
-    color: #0a58ca;
-    font-weight: 600;
+    color: #212529;
+    font-weight: 500;
 }
 
 .team-row.winner .team-score {
-    color: #0a58ca;
+    color: #28a745;
 }
 
 /* Trophy Placeholder for Final */

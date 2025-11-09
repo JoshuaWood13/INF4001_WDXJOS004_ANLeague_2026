@@ -39,7 +39,7 @@
                         <div class="match-body">
 
                             <!-- Home -->
-                            <div class="team-row @(Model.QF1.HomeCountry == null ? "placeholder" : "")">
+                            <div class="team-row @(Model.QF1.HomeCountry == null ? "placeholder" : "") @(Model.QF1.IsMatchCompleted ? "match-completed" : "") @(Model.QF1.IsMatchCompleted && Model.QF1.HomeCountry != null && Model.QF1.WinnerId == Model.QF1.HomeCountry.Id ? "winner" : "")">
                                 <span class="team-seed @(Model.QF1.HomeCountry == null ? "placeholder" : "")">@(Model.QF1.HomeCountry != null ? (Model.SeedCounter++).ToString() : "—")</span>
                                 <span class="team-name">@(Model.QF1.HomeCountry?.Name ?? placeholderText)</span>
                                 @if (Model.ShowRemoveButtons && Model.QF1.HomeCountry != null)
@@ -57,7 +57,7 @@
                             </div>
 
                             <!-- Away -->
-                            <div class="team-row @(Model.QF1.AwayCountry == null ? "placeholder" : "")">
+                            <div class="team-row @(Model.QF1.AwayCountry == null ? "placeholder" : "") @(Model.QF1.IsMatchCompleted ? "match-completed" : "") @(Model.QF1.IsMatchCompleted && Model.QF1.AwayCountry != null && Model.QF1.WinnerId == Model.QF1.AwayCountry.Id ? "winner" : "")">
                                 <span class="team-seed @(Model.QF1.AwayCountry == null ? "placeholder" : "")">@(Model.QF1.AwayCountry != null ? (Model.SeedCounter++).ToString() : "—")</span>
                                 <span class="team-name">@(Model.QF1.AwayCountry?.Name ?? placeholderText)</span>
                                 @if (Model.ShowRemoveButtons && Model.QF1.AwayCountry != null)
@@ -103,7 +103,7 @@
                         <div class="match-body">
 
                             <!-- Home -->
-                            <div class="team-row @(Model.QF2.HomeCountry == null ? "placeholder" : "")">
+                            <div class="team-row @(Model.QF2.HomeCountry == null ? "placeholder" : "") @(Model.QF2.IsMatchCompleted ? "match-completed" : "") @(Model.QF2.IsMatchCompleted && Model.QF2.HomeCountry != null && Model.QF2.WinnerId == Model.QF2.HomeCountry.Id ? "winner" : "")">
                                 <span class="team-seed @(Model.QF2.HomeCountry == null ? "placeholder" : "")">@(Model.QF2.HomeCountry != null ? (Model.SeedCounter++).ToString() : "—")</span>
                                 <span class="team-name">@(Model.QF2.HomeCountry?.Name ?? placeholderText)</span>
                                 @if (Model.ShowRemoveButtons && Model.QF2.HomeCountry != null)
@@ -121,7 +121,7 @@
                             </div>
 
                             <!-- Away -->
-                            <div class="team-row @(Model.QF2.AwayCountry == null ? "placeholder" : "")">
+                            <div class="team-row @(Model.QF2.AwayCountry == null ? "placeholder" : "") @(Model.QF2.IsMatchCompleted ? "match-completed" : "") @(Model.QF2.IsMatchCompleted && Model.QF2.AwayCountry != null && Model.QF2.WinnerId == Model.QF2.AwayCountry.Id ? "winner" : "")">
                                 <span class="team-seed @(Model.QF2.AwayCountry == null ? "placeholder" : "")">@(Model.QF2.AwayCountry != null ? (Model.SeedCounter++).ToString() : "—")</span>
                                 <span class="team-name">@(Model.QF2.AwayCountry?.Name ?? placeholderText)</span>
                                 @if (Model.ShowRemoveButtons && Model.QF2.AwayCountry != null)
@@ -169,14 +169,14 @@
                         <div class="match-body">
 
                             <!-- Home -->
-                            <div class="team-row @(Model.SF1.HomeCountry == null ? "placeholder" : "")">
+                            <div class="team-row @(Model.SF1.HomeCountry == null ? "placeholder" : "") @(Model.SF1.IsMatchCompleted ? "match-completed" : "") @(Model.SF1.IsMatchCompleted && Model.SF1.HomeCountry != null && Model.SF1.WinnerId == Model.SF1.HomeCountry.Id ? "winner" : "")">
                                 <span class="team-seed @(Model.SF1.HomeCountry == null ? "placeholder" : "")">@(Model.SF1.HomeCountry != null ? (Model.SeedCounter++).ToString() : "—")</span>
                                 <span class="team-name">@(Model.SF1.HomeCountry?.Name ?? "Winner Quarter Final 1")</span>
                                 <span class="team-score">@(Model.SF1.HomeCountry != null && Model.SF1.IsMatchCompleted ? Model.SF1.HomeScore.ToString() : placeholderScore)</span>
                             </div>
 
                             <!-- Away -->
-                            <div class="team-row @(Model.SF1.AwayCountry == null ? "placeholder" : "")">
+                            <div class="team-row @(Model.SF1.AwayCountry == null ? "placeholder" : "") @(Model.SF1.IsMatchCompleted ? "match-completed" : "") @(Model.SF1.IsMatchCompleted && Model.SF1.AwayCountry != null && Model.SF1.WinnerId == Model.SF1.AwayCountry.Id ? "winner" : "")">
                                 <span class="team-seed @(Model.SF1.AwayCountry == null ? "placeholder" : "")">@(Model.SF1.AwayCountry != null ? (Model.SeedCounter++).ToString() : "—")</span>
                                 <span class="team-name">@(Model.SF1.AwayCountry?.Name ?? "Winner Quarter Final 2")</span>
                                 <span class="team-score">@(Model.SF1.AwayCountry != null && Model.SF1.IsMatchCompleted ? Model.SF1.AwayScore.ToString() : placeholderScore)</span>
@@ -225,14 +225,14 @@
                         <div class="match-body">
 
                             <!-- Home -->
-                            <div class="team-row @(Model.Final.HomeCountry == null ? "placeholder" : "")">
+                            <div class="team-row @(Model.Final.HomeCountry == null ? "placeholder" : "") @(Model.Final.IsMatchCompleted ? "match-completed" : "") @(Model.Final.IsMatchCompleted && Model.Final.HomeCountry != null && Model.Final.WinnerId == Model.Final.HomeCountry.Id ? "winner" : "")">
                                 <span class="team-seed @(Model.Final.HomeCountry == null ? "placeholder" : "")">@(Model.Final.HomeCountry != null ? (Model.SeedCounter++).ToString() : "—")</span>
                                 <span class="team-name">@(Model.Final.HomeCountry?.Name ?? "Winner Semi Final 1")</span>
                                 <span class="team-score">@(Model.Final.HomeCountry != null && Model.Final.IsMatchCompleted ? Model.Final.HomeScore.ToString() : placeholderScore)</span>
                             </div>
 
                             <!-- Away -->
-                            <div class="team-row @(Model.Final.AwayCountry == null ? "placeholder" : "")">
+                            <div class="team-row @(Model.Final.AwayCountry == null ? "placeholder" : "") @(Model.Final.IsMatchCompleted ? "match-completed" : "") @(Model.Final.IsMatchCompleted && Model.Final.AwayCountry != null && Model.Final.WinnerId == Model.Final.AwayCountry.Id ? "winner" : "")">
                                 <span class="team-seed @(Model.Final.AwayCountry == null ? "placeholder" : "")">@(Model.Final.AwayCountry != null ? (Model.SeedCounter++).ToString() : "—")</span>
                                 <span class="team-name">@(Model.Final.AwayCountry?.Name ?? "Winner Semi Final 2")</span>
                                 <span class="team-score">@(Model.Final.AwayCountry != null && Model.Final.IsMatchCompleted ? Model.Final.AwayScore.ToString() : placeholderScore)</span>
@@ -269,14 +269,14 @@
                         <div class="match-body">
 
                             <!-- Home -->
-                            <div class="team-row @(Model.SF2.HomeCountry == null ? "placeholder" : "")">
+                            <div class="team-row @(Model.SF2.HomeCountry == null ? "placeholder" : "") @(Model.SF2.IsMatchCompleted ? "match-completed" : "") @(Model.SF2.IsMatchCompleted && Model.SF2.HomeCountry != null && Model.SF2.WinnerId == Model.SF2.HomeCountry.Id ? "winner" : "")">
                                 <span class="team-seed @(Model.SF2.HomeCountry == null ? "placeholder" : "")">@(Model.SF2.HomeCountry != null ? (Model.SeedCounter++).ToString() : "—")</span>
                                 <span class="team-name">@(Model.SF2.HomeCountry?.Name ?? "Winner Quarter Final 3")</span>
                                 <span class="team-score">@(Model.SF2.HomeCountry != null && Model.SF2.IsMatchCompleted ? Model.SF2.HomeScore.ToString() : placeholderScore)</span>
                             </div>
 
                             <!-- Away -->
-                            <div class="team-row @(Model.SF2.AwayCountry == null ? "placeholder" : "")">
+                            <div class="team-row @(Model.SF2.AwayCountry == null ? "placeholder" : "") @(Model.SF2.IsMatchCompleted ? "match-completed" : "") @(Model.SF2.IsMatchCompleted && Model.SF2.AwayCountry != null && Model.SF2.WinnerId == Model.SF2.AwayCountry.Id ? "winner" : "")">
                                 <span class="team-seed @(Model.SF2.AwayCountry == null ? "placeholder" : "")">@(Model.SF2.AwayCountry != null ? (Model.SeedCounter++).ToString() : "—")</span>
                                 <span class="team-name">@(Model.SF2.AwayCountry?.Name ?? "Winner Quarter Final 4")</span>
                                 <span class="team-score">@(Model.SF2.AwayCountry != null && Model.SF2.IsMatchCompleted ? Model.SF2.AwayScore.ToString() : placeholderScore)</span>
@@ -315,7 +315,7 @@
                         <div class="match-body">
 
                             <!-- Home -->
-                            <div class="team-row @(Model.QF3.HomeCountry == null ? "placeholder" : "")">
+                            <div class="team-row @(Model.QF3.HomeCountry == null ? "placeholder" : "") @(Model.QF3.IsMatchCompleted ? "match-completed" : "") @(Model.QF3.IsMatchCompleted && Model.QF3.HomeCountry != null && Model.QF3.WinnerId == Model.QF3.HomeCountry.Id ? "winner" : "")">
                                 <span class="team-seed @(Model.QF3.HomeCountry == null ? "placeholder" : "")">@(Model.QF3.HomeCountry != null ? (Model.SeedCounter++).ToString() : "—")</span>
                                 <span class="team-name">@(Model.QF3.HomeCountry?.Name ?? placeholderText)</span>
                                 @if (Model.ShowRemoveButtons && Model.QF3.HomeCountry != null)
@@ -333,7 +333,7 @@
                             </div>
 
                             <!-- Away -->
-                            <div class="team-row @(Model.QF3.AwayCountry == null ? "placeholder" : "")">
+                            <div class="team-row @(Model.QF3.AwayCountry == null ? "placeholder" : "") @(Model.QF3.IsMatchCompleted ? "match-completed" : "") @(Model.QF3.IsMatchCompleted && Model.QF3.AwayCountry != null && Model.QF3.WinnerId == Model.QF3.AwayCountry.Id ? "winner" : "")">
                                 <span class="team-seed @(Model.QF3.AwayCountry == null ? "placeholder" : "")">@(Model.QF3.AwayCountry != null ? (Model.SeedCounter++).ToString() : "—")</span>
                                 <span class="team-name">@(Model.QF3.AwayCountry?.Name ?? placeholderText)</span>
                                 @if (Model.ShowRemoveButtons && Model.QF3.AwayCountry != null)
@@ -379,7 +379,7 @@
                         <div class="match-body">
 
                             <!-- Home -->
-                            <div class="team-row @(Model.QF4.HomeCountry == null ? "placeholder" : "")">
+                            <div class="team-row @(Model.QF4.HomeCountry == null ? "placeholder" : "") @(Model.QF4.IsMatchCompleted ? "match-completed" : "") @(Model.QF4.IsMatchCompleted && Model.QF4.HomeCountry != null && Model.QF4.WinnerId == Model.QF4.HomeCountry.Id ? "winner" : "")">
                                 <span class="team-seed @(Model.QF4.HomeCountry == null ? "placeholder" : "")">@(Model.QF4.HomeCountry != null ? (Model.SeedCounter++).ToString() : "—")</span>
                                 <span class="team-name">@(Model.QF4.HomeCountry?.Name ?? placeholderText)</span>
                                 @if (Model.ShowRemoveButtons && Model.QF4.HomeCountry != null)
@@ -397,7 +397,7 @@
                             </div>
 
                             <!-- Away -->
-                            <div class="team-row @(Model.QF4.AwayCountry == null ? "placeholder" : "")">
+                            <div class="team-row @(Model.QF4.AwayCountry == null ? "placeholder" : "") @(Model.QF4.IsMatchCompleted ? "match-completed" : "") @(Model.QF4.IsMatchCompleted && Model.QF4.AwayCountry != null && Model.QF4.WinnerId == Model.QF4.AwayCountry.Id ? "winner" : "")">
                                 <span class="team-seed @(Model.QF4.AwayCountry == null ? "placeholder" : "")">@(Model.QF4.AwayCountry != null ? (Model.SeedCounter++).ToString() : "—")</span>
                                 <span class="team-name">@(Model.QF4.AwayCountry?.Name ?? placeholderText)</span>
                                 @if (Model.ShowRemoveButtons && Model.QF4.AwayCountry != null)
