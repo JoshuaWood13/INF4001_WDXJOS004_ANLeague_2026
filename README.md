@@ -2,7 +2,7 @@
 
 **UCT Username:** WDXJOS004
 
-## Live Demo
+## Deployed Site
 
 🔗 **Deployment:** [https://african-nations-league-wdxjos004-fda5defucdgnhdax.southafricanorth-01.azurewebsites.net/](https://african-nations-league-wdxjos004-fda5defucdgnhdax.southafricanorth-01.azurewebsites.net/)
 
