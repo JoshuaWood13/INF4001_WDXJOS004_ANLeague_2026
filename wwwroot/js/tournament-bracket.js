@@ -6,6 +6,80 @@ document.addEventListener('DOMContentLoaded', function () {
     initializeRemoveButtons();
 });
 
+// Show toast notification
+function showToast(message, type = 'error') {
+    // Remove any existing toast messages
+    const existingToasts = document.querySelectorAll('.toast-alert-message');
+    existingToasts.forEach(toast => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            if (toast && toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    });
+
+    // Determine alert class based on type
+    let alertClass = 'alert-danger';
+    let alertTitle = 'Error!';
+    
+    if (type === 'success') {
+        alertClass = 'alert-success';
+        alertTitle = 'Success!';
+    } else if (type === 'info') {
+        alertClass = 'alert-info';
+        alertTitle = 'Info!';
+    }
+
+    // Create alert element
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert ${alertClass} alert-dismissible fade show toast-alert-message position-fixed`;
+    alertDiv.style.cssText = 'top: 80px; right: 20px; z-index: 1100; max-width: 400px;';
+    alertDiv.setAttribute('role', 'alert');
+    
+    // Create close button
+    const closeButton = document.createElement('button');
+    closeButton.type = 'button';
+    closeButton.className = 'btn-close';
+    closeButton.setAttribute('aria-label', 'Close');
+    closeButton.addEventListener('click', function() {
+        alertDiv.classList.remove('show');
+        setTimeout(() => {
+            if (alertDiv && alertDiv.parentNode) {
+                alertDiv.parentNode.removeChild(alertDiv);
+            }
+        }, 300);
+    });
+    
+    // Create message content
+    const strong = document.createElement('strong');
+    strong.textContent = alertTitle + ' ';
+    alertDiv.appendChild(strong);
+    alertDiv.appendChild(document.createTextNode(message));
+    alertDiv.appendChild(closeButton);
+
+    // Append to body
+    document.body.appendChild(alertDiv);
+
+    // Trigger fade in animation
+    setTimeout(() => {
+        alertDiv.classList.add('show');
+    }, 10);
+
+    // Auto-dismiss after 3 seconds
+    setTimeout(() => {
+        if (alertDiv && alertDiv.parentNode) {
+            alertDiv.classList.remove('show');
+            // Remove from DOM after fade out
+            setTimeout(() => {
+                if (alertDiv && alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 300);
+        }
+    }, 3000);
+}
+
 // Initialize all join buttons for representatives
 function initializeJoinButtons() {
     const joinButtons = document.querySelectorAll('.join-slot-btn');
@@ -43,6 +117,13 @@ async function joinTournamentSlot(matchId, slot, button) {
             })
         });
 
+        // Check if response is ok before parsing
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Server response:', response.status, errorText);
+            throw new Error(`Server returned ${response.status}: ${response.statusText}`);
+        }
+
         const result = await response.json();
 
         if (result.success) {
@@ -59,7 +140,7 @@ async function joinTournamentSlot(matchId, slot, button) {
         console.error('Error joining tournament:', error);
         button.disabled = false;
         button.textContent = originalText;
-        showToast('An error occurred while joining the tournament', 'error');
+        showToast(error.message || 'An error occurred while joining the tournament', 'error');
     }
 }
 
