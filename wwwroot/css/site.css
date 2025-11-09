@@ -20,3 +20,24 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.navbar a.nav-link {
+    transition: color 0.3s ease;
+}
+
+.navbar a.nav-link:hover {
+    color: white !important;
+}
+
+.navbar .nav-item span.nav-link:hover {
+    color: inherit !important;
+}
+
+.navbar .nav-item button.nav-link:hover {
+    color: inherit !important;
+}
+
+.navbar .nav-item a.btn:hover,
+.navbar .nav-item button.btn:hover {
+    color: unset !important;
+}
