@@ -1,5 +1,22 @@
 @inject IConfiguration Configuration
 
+<!-- Success Message -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show position-fixed"
+         style="top: 80px; right: 20px; z-index: 1100; max-width: 400px;" id="successMessage">
+        <strong>Success!</strong> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Firebase Error Alert -->
+<div id="error-message" class="alert alert-danger alert-dismissible fade show position-fixed" 
+     style="top: 80px; right: 20px; z-index: 1100; max-width: 400px; display: none;">
+    <strong>Error!</strong> <span id="error-text"></span>
+    <button type="button" class="btn-close" onclick="hideError(document.getElementById('error-message'))"></button>
+</div>
+
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
@@ -9,29 +26,33 @@
                 </div>
                 <div class="card-body">
 
-                    @if (TempData["SuccessMessage"] != null)
-                    {
-                        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
-                    }
-
-                    <div id="error-message" class="alert alert-danger" style="display: none;"></div>
-
                     <form id="login-form">
 
                         <!-- Email -->
                         <div class="mb-3">
                             <label for="email" class="form-label">Email Address</label>
-                            <input type="email" id="email" class="form-control" required placeholder="your.email@example.com" />
+                            <input type="email" 
+                                   id="email" 
+                                   name="email"
+                                   class="form-control" 
+                                   placeholder="email@example.com"
+                                   data-val-required="Email address is required" />
+                            <span class="invalid-feedback"></span>
                         </div>
 
                         <!-- Password -->
                         <div class="mb-3">
                             <label for="password" class="form-label">Password</label>
-                            <input type="password" id="password" class="form-control" required />
+                            <input type="password" 
+                                   id="password" 
+                                   name="password"
+                                   class="form-control"
+                                   data-val-required="Password is required" />
+                            <span class="invalid-feedback"></span>
                         </div>
                         
                         <!-- Button -->
-                        <button type="submit" id="login-btn" class="btn btn-primary w-100 mb-3">
+                        <button type="submit" id="login-btn" class="btn btn-success w-100 mb-3">
                             <span id="login-text">Login</span>
                             <span id="login-spinner" class="spinner-border spinner-border-sm" style="display: none;"></span>
                         </button>
@@ -56,7 +77,7 @@
     <script src="~/js/account-login.js"></script>
 
     <script>
-        // Initialize Firebase
+        // Initialize Firebase and login form
         document.addEventListener('DOMContentLoaded', function () {
             const firebaseConfig = {
                 apiKey: "@Configuration["FirebaseWeb:ApiKey"]",
@@ -68,30 +89,7 @@
             };
 
             initializeFirebase(firebaseConfig);
-
-            // Handle form submission
-            const loginForm = document.getElementById('login-form');
-            loginForm.addEventListener('submit', async function(e) {
-                e.preventDefault();
-
-                const email = document.getElementById('email').value;
-                const password = document.getElementById('password').value;
-                const loginBtn = document.getElementById('login-btn');
-                const errorMessage = document.getElementById('error-message');
-
-                setButtonLoading(loginBtn, true);
-                hideError(errorMessage);
-
-                // Complete login process, after firebase auth 
-                const result = await handleLogin(email, password, '@Url.Action("LoginCallback", "Account")');
-
-                if (result.success) {
-                    window.location.href = result.redirectUrl;
-                } else {
-                    showError(errorMessage, result.error);
-                    setButtonLoading(loginBtn, false);
-                }
-            });
+            initializeLoginForm('@Url.Action("LoginCallback", "Account")');
         });
     </script>
 }

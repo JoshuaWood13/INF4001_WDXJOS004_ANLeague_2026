@@ -117,7 +117,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
             {
                 if (string.IsNullOrEmpty(model.IdToken))
                 {
-                    return Json(new { success = false, message = "Invalid token" });
+                    return Json(new { success = false, message = "Authentication token is missing. Please try logging in again." });
                 }
 
                 // Verify firebase ID token
@@ -125,7 +125,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
 
                 if (!isValid)
                 {
-                    return Json(new { success = false, message = "Invalid or expired token" });
+                    return Json(new { success = false, message = "Your session has expired. Please log in again." });
                 }
 
                 // Get user info from token
@@ -134,7 +134,7 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
 
                 if (userId == null || role == null)
                 {
-                    return Json(new { success = false, message = "Unable to retrieve user information" });
+                    return Json(new { success = false, message = "Unable to retrieve your account information. Please try logging in again." });
                 }
 
                 // Set secure authentication cookie
@@ -181,10 +181,15 @@ namespace INF4001_WDXJOS004_ANLeague_2026.Controllers
 
                 return Json(new { success = true, redirectUrl });
             }
+            catch (FirebaseAuthException fbEx)
+            {
+                _logger.LogError(fbEx, "Firebase authentication error during login callback");
+                return Json(new { success = false, message = "Authentication failed. Please check your credentials and try again." });
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error during login callback");
-                return Json(new { success = false, message = "Login failed. Please try again." });
+                return Json(new { success = false, message = "An unexpected error occurred. Please try again in a moment." });
             }
         }
 
